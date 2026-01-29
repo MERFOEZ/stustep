@@ -4,6 +4,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/learning_screen.dart';
 import 'screens/branding_screen.dart';
+import 'screens/gaming.dart';
 
 void main() {
   runApp(const StuStepApp());
@@ -48,6 +49,7 @@ class _MainNavigatorState extends State<MainNavigator> {
     const DashboardScreen(),
     const LoginScreen(),
     const LearningScreen(),
+    const GamingScreen(),
   ];
 
   @override
