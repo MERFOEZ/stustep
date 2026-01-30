@@ -22,7 +22,7 @@ class GamingScreen extends StatelessWidget {
                 child: Container(
                   margin: const EdgeInsets.only(top: 20),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.95),
+                    color: const Color.fromRGBO(255, 255, 255, 0.95),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(40),
                       topRight: Radius.circular(40),
@@ -71,7 +71,7 @@ class GamingScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: const Color.fromRGBO(255, 255, 255, 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(Icons.psychology, color: Colors.white, size: 32),
@@ -98,7 +98,7 @@ class GamingScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: const Color.fromRGBO(255, 255, 255, 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Stack(
@@ -182,6 +182,8 @@ class GamingScreen extends StatelessWidget {
     required Gradient gradient,
     required VoidCallback onTap,
   }) {
+    final linearGradient = gradient as LinearGradient;
+    final firstColor = linearGradient.colors.first;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -191,7 +193,12 @@ class GamingScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: (gradient as LinearGradient).colors.first.withOpacity(0.4),
+              color: Color.fromRGBO(
+                firstColor.r.round(),
+                firstColor.g.round(),
+                firstColor.b.round(),
+                0.4,
+              ),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -205,7 +212,7 @@ class GamingScreen extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 120,
-                color: Colors.white.withOpacity(0.2),
+                color: const Color.fromRGBO(255, 255, 255, 0.2),
               ),
             ),
             Padding(
@@ -216,7 +223,7 @@ class GamingScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.25),
+                      color: const Color.fromRGBO(255, 255, 255, 0.25),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(icon, color: Colors.white, size: 28),
@@ -234,7 +241,7 @@ class GamingScreen extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
+                      color: const Color.fromRGBO(255, 255, 255, 0.85),
                       fontSize: 13,
                     ),
                   ),
@@ -310,12 +317,25 @@ class GamingScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: game.color.withOpacity(0.2),
+              color: Color.fromRGBO(
+                game.color.r.round(),
+                game.color.g.round(),
+                game.color.b.round(),
+                0.2,
+              ),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
           ],
-          border: Border.all(color: game.color.withOpacity(0.1), width: 2),
+          border: Border.all(
+            color: Color.fromRGBO(
+              game.color.r.round(),
+              game.color.g.round(),
+              game.color.b.round(),
+              0.1,
+            ),
+            width: 2,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -323,7 +343,12 @@ class GamingScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: game.color.withOpacity(0.12),
+                color: Color.fromRGBO(
+                  game.color.r.round(),
+                  game.color.g.round(),
+                  game.color.b.round(),
+                  0.12,
+                ),
                 shape: BoxShape.circle,
               ),
               child: Icon(game.icon, color: game.color, size: 28),
@@ -354,7 +379,7 @@ class GamingScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF667eea).withOpacity(0.4),
+            color: const Color.fromRGBO(102, 126, 234, 0.4),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -365,7 +390,7 @@ class GamingScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: const Color.fromRGBO(255, 255, 255, 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Icon(
@@ -391,7 +416,7 @@ class GamingScreen extends StatelessWidget {
                 Text(
                   'لقد أكملت 5 ألعاب هذا الأسبوع',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
+                    color: const Color.fromRGBO(255, 255, 255, 0.85),
                     fontSize: 13,
                   ),
                 ),
@@ -556,7 +581,7 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: const Color.fromRGBO(0, 0, 0, 0.2),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -593,7 +618,7 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: const Color.fromRGBO(255, 255, 255, 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
@@ -612,7 +637,7 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: const Color.fromRGBO(255, 255, 255, 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Row(
@@ -678,9 +703,9 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF11998e).withOpacity(0.3)
+              ? const Color.fromRGBO(17, 153, 142, 0.3)
               : isInSelectedRegion
-              ? const Color(0xFF11998e).withOpacity(0.1)
+              ? const Color.fromRGBO(17, 153, 142, 0.1)
               : Colors.white,
           border: Border(
             top: BorderSide(
@@ -749,7 +774,7 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
         decoration: BoxDecoration(
           color: isErase
               ? Colors.red.shade100
-              : const Color(0xFF11998e).withOpacity(0.1),
+              : const Color.fromRGBO(17, 153, 142, 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
@@ -838,7 +863,7 @@ class _ChessGameScreenState extends State<ChessGameScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: const Color.fromRGBO(0, 0, 0, 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -870,7 +895,7 @@ class _ChessGameScreenState extends State<ChessGameScreen> {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: const Color.fromRGBO(255, 255, 255, 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
@@ -889,7 +914,7 @@ class _ChessGameScreenState extends State<ChessGameScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: const Color.fromRGBO(255, 255, 255, 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.settings, color: Colors.white),
@@ -904,7 +929,7 @@ class _ChessGameScreenState extends State<ChessGameScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: const Color.fromRGBO(255, 255, 255, 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -973,14 +998,18 @@ class _ChessGameScreenState extends State<ChessGameScreen> {
   }
 
   BorderRadius? _getCellBorderRadius(int row, int col) {
-    if (row == 0 && col == 0)
+    if (row == 0 && col == 0) {
       return const BorderRadius.only(topLeft: Radius.circular(8));
-    if (row == 0 && col == 7)
+    }
+    if (row == 0 && col == 7) {
       return const BorderRadius.only(topRight: Radius.circular(8));
-    if (row == 7 && col == 0)
+    }
+    if (row == 7 && col == 0) {
       return const BorderRadius.only(bottomLeft: Radius.circular(8));
-    if (row == 7 && col == 7)
+    }
+    if (row == 7 && col == 7) {
       return const BorderRadius.only(bottomRight: Radius.circular(8));
+    }
     return null;
   }
 
@@ -1035,7 +1064,7 @@ class _ChessGameScreenState extends State<ChessGameScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: const Color.fromRGBO(255, 255, 255, 0.2),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -1125,7 +1154,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen> {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: const Color.fromRGBO(255, 255, 255, 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
@@ -1150,14 +1179,18 @@ class _TicTacToeScreenState extends State<TicTacToeScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 32),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: const Color.fromRGBO(255, 255, 255, 0.15),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildScoreItem('X', xScore, const Color(0xFFFF6B6B)),
-          Container(width: 2, height: 40, color: Colors.white.withOpacity(0.3)),
+          Container(
+            width: 2,
+            height: 40,
+            color: const Color.fromRGBO(255, 255, 255, 0.3),
+          ),
           _buildScoreItem('O', oScore, const Color(0xFF4ECDC4)),
         ],
       ),
@@ -1192,7 +1225,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 32),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: const Color.fromRGBO(255, 255, 255, 0.2),
         borderRadius: BorderRadius.circular(24),
       ),
       child: AspectRatio(
@@ -1220,7 +1253,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: const Color.fromRGBO(0, 0, 0, 0.1),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1334,7 +1367,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: const Color.fromRGBO(255, 255, 255, 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -1362,7 +1395,7 @@ class _TicTacToeScreenState extends State<TicTacToeScreen> {
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: const Color.fromRGBO(0, 0, 0, 0.2),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),

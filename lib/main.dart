@@ -5,6 +5,7 @@ import 'screens/login_screen.dart';
 import 'screens/learning_screen.dart';
 import 'screens/branding_screen.dart';
 import 'screens/gaming.dart';
+import 'screens/courses.dart';
 
 void main() {
   runApp(const StuStepApp());
@@ -43,13 +44,14 @@ class MainNavigator extends StatefulWidget {
 }
 
 class _MainNavigatorState extends State<MainNavigator> {
-  int _currentIndex = 0;
+  int _currentIndex = 5;
   final List<Widget> _screens = [
     const BrandingScreen(),
     const DashboardScreen(),
     const LoginScreen(),
     const LearningScreen(),
     const GamingScreen(),
+    const CoursesScreen(),
   ];
 
   @override
