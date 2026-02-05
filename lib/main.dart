@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
-import 'core/app_colors.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/learning_screen.dart';
-import 'screens/branding_screen.dart';
-import 'screens/gaming.dart';
-import 'screens/courses.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'core/theme/theme_provider.dart';
+import 'core/theme/app_theme.dart';
+import 'features/splash/splash_screen.dart';
 
-void main() {
-  runApp(const StuStepApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+  await Hive.initFlutter();
+
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('ar')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('ar'),
+      startLocale: const Locale('ar'),
+      child: MultiProvider(
+        providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
+        child: const StuStepApp(),
+      ),
+    ),
+  );
 }
 
 class StuStepApp extends StatelessWidget {
@@ -17,56 +31,15 @@ class StuStepApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'StuStep',
+      title: 'stustep',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: AppColors.background,
-        fontFamily: 'Roboto', // Customizing font if available or default
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-          secondary: AppColors.secondary,
-        ),
-      ),
-      // For demonstration, we can start with Login or Dashboard
-      // Let's start with Dashboard and allow navigation to others for preview
-      home: const MainNavigator(),
-    );
-  }
-}
-
-class MainNavigator extends StatefulWidget {
-  const MainNavigator({super.key});
-
-  @override
-  State<MainNavigator> createState() => _MainNavigatorState();
-}
-
-class _MainNavigatorState extends State<MainNavigator> {
-  int _currentIndex = 5;
-  final List<Widget> _screens = [
-    const BrandingScreen(),
-    const DashboardScreen(),
-    const LoginScreen(),
-    const LearningScreen(),
-    const GamingScreen(),
-    const CoursesScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_currentIndex],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _currentIndex = (_currentIndex + 1) % _screens.length;
-          });
-        },
-        backgroundColor: AppColors.accentPink,
-        child: const Icon(Icons.swap_horiz, color: Colors.white),
-      ),
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      theme: AppTheme.lightTheme(context),
+      darkTheme: AppTheme.darkTheme(context),
+      themeMode: context.watch<ThemeProvider>().themeMode,
+      home: const SplashScreen(),
     );
   }
 }
