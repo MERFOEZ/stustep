@@ -46,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
           children: [
             FadeInUp(
               duration: const Duration(milliseconds: 600),
-              child: _buildSectionHeader(context, 'General'),
+              child: _buildSectionHeader(context, 'general'.tr()),
             ),
             const SizedBox(height: 10),
             FadeInUp(

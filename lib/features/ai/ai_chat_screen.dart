@@ -60,7 +60,7 @@ class _AIChatScreenState extends State<AIChatScreen>
     }
 
     final String attachmentInfo = _attachedFileName != null
-        ? "\n[Attachment: $_attachedFileName (${_attachedFileType})]"
+        ? "\n[Attachment: $_attachedFileName ($_attachedFileType)]"
         : "";
 
     setState(() {
@@ -389,7 +389,7 @@ class _AIChatScreenState extends State<AIChatScreen>
     return TextField(
       controller: _controller,
       decoration: InputDecoration(
-        hintText: 'أسال الذكاء الاصطناعي أي شيء '.tr(),
+        hintText: 'ask_ai_hint'.tr(),
         hintStyle: TextStyle(
           color: Theme.of(context).hintColor.withValues(alpha: 0.5),
           fontSize: 14,
@@ -503,69 +503,75 @@ class _AIChatScreenState extends State<AIChatScreen>
                   return Wrap(
                     spacing: 12,
                     runSpacing: 12,
-                    children: AIModel.values.map((model) {
-                      final isSelected = _selectedModel == model;
-                      final width = (constraints.maxWidth - 12) / 2;
-                      return FadeInUp(
-                        duration: const Duration(milliseconds: 400),
-                        delay: Duration(milliseconds: model.index * 100),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() => _selectedModel = model);
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            width: width,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Theme.of(
-                                      context,
-                                    ).primaryColor.withValues(alpha: 0.1)
-                                  : Theme.of(
-                                      context,
-                                    ).cardColor.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected
-                                    ? Theme.of(context).primaryColor
-                                    : Colors.transparent,
-                                width: 2,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _getModelIcon(model),
-                                const SizedBox(height: 12),
-                                Text(
-                                  model.name.toUpperCase(),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                    children:
+                        [
+                          AIModel.deepseek,
+                          AIModel.gpt,
+                          AIModel.claude,
+                          AIModel.gemini,
+                        ].map((model) {
+                          final isSelected = _selectedModel == model;
+                          final width = (constraints.maxWidth - 12) / 2;
+                          return FadeInUp(
+                            duration: const Duration(milliseconds: 400),
+                            delay: Duration(milliseconds: model.index * 100),
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() => _selectedModel = model);
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                width: width,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Theme.of(
+                                          context,
+                                        ).primaryColor.withValues(alpha: 0.1)
+                                      : Theme.of(
+                                          context,
+                                        ).cardColor.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
                                     color: isSelected
                                         ? Theme.of(context).primaryColor
-                                        : null,
+                                        : Colors.transparent,
+                                    width: 2,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _getModelDescription(model),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.color
-                                        ?.withValues(alpha: 0.7),
-                                  ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _getModelIcon(model),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      model.name.toUpperCase(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: isSelected
+                                            ? Theme.of(context).primaryColor
+                                            : null,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _getModelDescription(model),
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.color
+                                            ?.withValues(alpha: 0.7),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                   );
                 },
               ),
@@ -578,30 +584,58 @@ class _AIChatScreenState extends State<AIChatScreen>
   }
 
   Widget _getModelIcon(AIModel model) {
-    String assetPath;
     switch (model) {
       case AIModel.deepseek:
-        assetPath = 'assets/images/deepseek_logo.png';
-        break;
-      case AIModel.gemini:
-        assetPath = 'assets/images/gemini_logo.png';
-        break;
-      case AIModel.claude:
-        assetPath = 'assets/images/claude_logo.jpg';
-        break;
+        return _buildAssetIconWrapper(
+          assetPath: 'assets/images/deepseek_logo.png',
+          color: const Color(0xFF2D5AF2),
+        );
       case AIModel.gpt:
-        assetPath = 'assets/images/gpt_logo.png';
-        break;
+        return _buildAssetIconWrapper(
+          assetPath: 'assets/images/gpt_logo.png',
+          color: const Color(0xFF10A37F),
+        );
+      case AIModel.claude:
+        return _buildAssetIconWrapper(
+          assetPath: 'assets/images/claude_logo.jpg',
+          color: const Color(0xFFD97757),
+        );
+      case AIModel.gemini:
+        return _buildAssetIconWrapper(
+          assetPath: 'assets/images/gemini_logo.png',
+          color: const Color(0xFF1A73E8),
+        );
     }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.asset(
-        assetPath,
-        width: 32,
-        height: 32,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.smart_toy, size: 32, color: Colors.grey),
+  }
+
+  Widget _buildAssetIconWrapper({
+    required String assetPath,
+    required Color color,
+  }) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.asset(
+          assetPath,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Container(
+            color: color.withValues(alpha: 0.05),
+            child: const Icon(Icons.broken_image, color: Colors.grey, size: 24),
+          ),
+        ),
       ),
     );
   }
@@ -611,9 +645,9 @@ class _AIChatScreenState extends State<AIChatScreen>
       case AIModel.deepseek:
         return 'DeepSeek R1';
       case AIModel.gemini:
-        return 'Multi-modal';
+        return 'Gemini 1.5 Pro';
       case AIModel.claude:
-        return 'Creative & Fast';
+        return 'Claude 3.5 Sonnet';
       case AIModel.gpt:
         return 'GPT-4o Mini';
     }

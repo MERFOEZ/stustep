@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/theme/app_theme.dart';
@@ -36,109 +35,86 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: ui.TextDirection.ltr,
-      child: Scaffold(
-        extendBody: true,
-        appBar: AppBar(
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: AppTheme.primaryGradient(context),
-            ),
-          ),
-          title: Text(
-            _getPageTitle(_currentIndex),
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          actions: const [],
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
-        drawer: Drawer(
-          child: Column(
-            children: [
-              UserAccountsDrawerHeader(
-                currentAccountPicture: ShakeY(
-                  infinite: true,
-                  duration: const Duration(seconds: 10),
-                  child: const CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.person,
-                      size: 40,
-                      color: Color(0xFF6200EE),
-                    ),
-                  ),
-                ),
-                accountName: Text('profile'.tr()),
-                accountEmail: const Text('student@stustep.com'),
-                decoration: BoxDecoration(
-                  gradient: AppTheme.primaryGradient(context),
-                ),
-              ),
-              _buildDrawerItem(Icons.settings, 'settings'.tr(), () {
-                Navigator.pop(context); // Close drawer
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsScreen(),
-                  ),
-                );
-              }),
-              _buildDrawerItem(Icons.calculate, 'academic_tools'.tr(), () {}),
-              _buildDrawerItem(Icons.help_outline, 'support'.tr(), () {}),
-              const Spacer(),
-              const Divider(),
-              _buildDrawerItem(
-                Icons.logout,
-                'logout'.tr(),
-                () {},
-                isDestructive: true,
-              ),
-              const SizedBox(height: 20),
-            ],
+    return Scaffold(
+      extendBody: true,
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: AppTheme.primaryGradient(context),
           ),
         ),
-        body: IndexedStack(index: _currentIndex, children: _pages),
-        bottomNavigationBar: BottomAppBar(
-          color: Theme.of(context).cardColor,
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildNavItem(
-                  0,
-                  Icons.smart_toy_rounded,
-                  'ai_chat'.tr(),
-                ),
-              ),
-              Expanded(
-                child: _buildNavItem(
-                  1,
-                  Icons.chat_bubble_rounded,
-                  'groups'.tr(),
-                ),
-              ),
-              Expanded(
-                child: _buildNavItem(2, Icons.home_rounded, 'home'.tr()),
-              ),
-              Expanded(
-                child: _buildNavItem(
-                  3,
-                  Icons.play_circle_rounded,
-                  'courses'.tr(),
-                ),
-              ),
-              Expanded(
-                child: _buildNavItem(
-                  4,
-                  Icons.download_rounded,
-                  'downloads'.tr(),
-                ),
-              ),
-            ],
+        title: Text(
+          _getPageTitle(_currentIndex),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
+        ),
+        actions: const [],
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            UserAccountsDrawerHeader(
+              currentAccountPicture: ShakeY(
+                infinite: true,
+                duration: const Duration(seconds: 10),
+                child: const CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, size: 40, color: Color(0xFF6200EE)),
+                ),
+              ),
+              accountName: Text('profile'.tr()),
+              accountEmail: const Text('student@stustep.com'),
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient(context),
+              ),
+            ),
+            _buildDrawerItem(Icons.settings, 'settings'.tr(), () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            }),
+            _buildDrawerItem(Icons.calculate, 'academic_tools'.tr(), () {}),
+            _buildDrawerItem(Icons.help_outline, 'support'.tr(), () {}),
+            const Spacer(),
+            const Divider(),
+            _buildDrawerItem(
+              Icons.logout,
+              'logout'.tr(),
+              () {},
+              isDestructive: true,
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).cardColor,
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildNavItem(0, Icons.smart_toy_rounded, 'ai_chat'.tr()),
+            ),
+            Expanded(
+              child: _buildNavItem(1, Icons.chat_bubble_rounded, 'groups'.tr()),
+            ),
+            Expanded(child: _buildNavItem(2, Icons.home_rounded, 'home'.tr())),
+            Expanded(
+              child: _buildNavItem(
+                3,
+                Icons.play_circle_rounded,
+                'courses'.tr(),
+              ),
+            ),
+            Expanded(
+              child: _buildNavItem(4, Icons.download_rounded, 'downloads'.tr()),
+            ),
+          ],
         ),
       ),
     );

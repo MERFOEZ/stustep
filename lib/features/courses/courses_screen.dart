@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
+import 'course_detail_screen.dart';
 
 class CoursesScreen extends StatelessWidget {
   const CoursesScreen({super.key});
@@ -40,18 +41,18 @@ class CoursesScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              _buildCourseSection(context, 'Mathematics', [
+              _buildCourseSection(context, 'mathematics', [
                 _Course(
-                  title: 'Algebra 101',
-                  instructor: 'Dr. Smith',
+                  title: 'algebra_101',
+                  instructor: 'dr_smith',
                   thumbnail: Icons.functions,
                   gradient: const LinearGradient(
                     colors: [Color(0xFF6200EE), Color(0xFF9C27B0)],
                   ),
                 ),
                 _Course(
-                  title: 'Calculus Advanced',
-                  instructor: 'Prof. Miller',
+                  title: 'calculus_advanced',
+                  instructor: 'prof_miller',
                   thumbnail: Icons.calculate,
                   gradient: const LinearGradient(
                     colors: [Color(0xFFD500F9), Color(0xFFE040FB)],
@@ -59,26 +60,26 @@ class CoursesScreen extends StatelessWidget {
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildCourseSection(context, 'Computer Science', [
+              _buildCourseSection(context, 'computer_science', [
                 _Course(
-                  title: 'Data Structures',
-                  instructor: 'Grace Hopper',
+                  title: 'data_structures',
+                  instructor: 'grace_hopper',
                   thumbnail: Icons.code,
                   gradient: const LinearGradient(
                     colors: [Color(0xFF00C853), Color(0xFF00E676)],
                   ),
                 ),
                 _Course(
-                  title: 'AI Fundamentals',
-                  instructor: 'Alan Turing',
+                  title: 'ai_fundamentals',
+                  instructor: 'alan_turing',
                   thumbnail: Icons.memory,
                   gradient: const LinearGradient(
                     colors: [Color(0xFFFF1744), Color(0xFFFF5252)],
                   ),
                 ),
                 _Course(
-                  title: 'Mobile Development',
-                  instructor: 'Steve Jobs',
+                  title: 'mobile_development',
+                  instructor: 'steve_jobs',
                   thumbnail: Icons.phone_android,
                   gradient: const LinearGradient(
                     colors: [Color(0xFFFFAB00), Color(0xFFFFD54F)],
@@ -86,18 +87,18 @@ class CoursesScreen extends StatelessWidget {
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildCourseSection(context, 'Business & Finance', [
+              _buildCourseSection(context, 'business_finance', [
                 _Course(
-                  title: 'Marketing 101',
-                  instructor: 'Seth Godin',
+                  title: 'marketing_101',
+                  instructor: 'seth_godin',
                   thumbnail: Icons.trending_up,
                   gradient: const LinearGradient(
                     colors: [Color(0xFF00BCD4), Color(0xFF00E5FF)],
                   ),
                 ),
                 _Course(
-                  title: 'Financial Analysis',
-                  instructor: 'Warren Buffett',
+                  title: 'financial_analysis',
+                  instructor: 'warren_buffett',
                   thumbnail: Icons.account_balance,
                   gradient: const LinearGradient(
                     colors: [Color(0xFF43A047), Color(0xFF66BB6A)],
@@ -123,7 +124,7 @@ class CoursesScreen extends StatelessWidget {
         FadeInLeft(
           duration: const Duration(milliseconds: 600),
           child: Text(
-            category,
+            category.tr(),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).primaryColor,
@@ -161,11 +162,23 @@ class CoursesScreen extends StatelessWidget {
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CourseDetailScreen(
+                              title: course.title,
+                              instructor: course.instructor,
+                              thumbnail: course.thumbnail,
+                              gradient: course.gradient,
+                            ),
+                          ),
+                        );
+                      },
                       child: Stack(
                         children: [
-                          Positioned(
-                            right: -20,
+                          PositionedDirectional(
+                            end: -20,
                             top: -20,
                             child: Opacity(
                               opacity: 0.2,
@@ -208,7 +221,7 @@ class CoursesScreen extends StatelessWidget {
                                 ),
                                 const Spacer(),
                                 Text(
-                                  course.title,
+                                  course.title.tr(),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -226,7 +239,7 @@ class CoursesScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  course.instructor,
+                                  course.instructor.tr(),
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.white.withValues(alpha: 0.9),

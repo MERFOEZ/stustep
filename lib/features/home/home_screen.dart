@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/theme/app_theme.dart';
+import 'service_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -120,6 +121,7 @@ class HomeScreen extends StatelessWidget {
                       colors: [Color(0xFF6200EE), Color(0xFF9C27B0)],
                     ),
                     0,
+                    'major_matcher_desc',
                   ),
                   _buildServiceCard(
                     context,
@@ -129,6 +131,7 @@ class HomeScreen extends StatelessWidget {
                       colors: [Color(0xFF00C853), Color(0xFF00E676)],
                     ),
                     100,
+                    'university_portal_desc',
                   ),
                   _buildServiceCard(
                     context,
@@ -138,6 +141,7 @@ class HomeScreen extends StatelessWidget {
                       colors: [Color(0xFFFFAB00), Color(0xFFFFD54F)],
                     ),
                     200,
+                    'gpa_predictor_desc',
                   ),
                   _buildServiceCard(
                     context,
@@ -147,6 +151,7 @@ class HomeScreen extends StatelessWidget {
                       colors: [Color(0xFFD500F9), Color(0xFFE040FB)],
                     ),
                     300,
+                    'marketplace_desc',
                   ),
                   _buildServiceCard(
                     context,
@@ -156,6 +161,7 @@ class HomeScreen extends StatelessWidget {
                       colors: [Color(0xFFFF1744), Color(0xFFFF5252)],
                     ),
                     400,
+                    'scholarship_radar_desc',
                   ),
                 ]),
               ),
@@ -173,6 +179,7 @@ class HomeScreen extends StatelessWidget {
     IconData icon,
     Gradient gradient,
     int delay,
+    String descriptionKey,
   ) {
     return ElasticIn(
       delay: Duration(milliseconds: delay),
@@ -196,11 +203,23 @@ class HomeScreen extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(28),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ServiceDetailScreen(
+                    title: title,
+                    descriptionKey: descriptionKey,
+                    icon: icon,
+                    gradient: gradient,
+                  ),
+                ),
+              );
+            },
             child: Stack(
               children: [
-                Positioned(
-                  right: -30,
+                PositionedDirectional(
+                  end: -30,
                   top: -30,
                   child: Opacity(
                     opacity: 0.15,
