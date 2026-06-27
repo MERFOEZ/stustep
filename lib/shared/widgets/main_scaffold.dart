@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/auth_service.dart';
+import '../../features/auth/login_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/ai/ai_chat_screen.dart';
 import '../../features/courses/courses_screen.dart';
@@ -18,6 +20,9 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 2;
+  final AuthService _authService = AuthService();
+  String _userName = '';
+  String _userEmail = '';
 
   final List<Widget> _pages = [
     const AIChatScreen(),
@@ -26,6 +31,32 @@ class _MainScaffoldState extends State<MainScaffold> {
     const CoursesScreen(),
     const DownloadsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _userName = 'loading'.tr();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final currentUser = _authService.currentUser;
+    if (currentUser != null) {
+      setState(() {
+        _userEmail = currentUser.email ?? '';
+        _userName = currentUser.displayName ?? 'Student';
+      });
+
+      final firestoreData = await _authService.getUserData(currentUser.uid);
+      if (firestoreData != null && firestoreData['name'] != null) {
+        if (mounted) {
+          setState(() {
+            _userName = firestoreData['name'] as String;
+          });
+        }
+      }
+    }
+  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -65,8 +96,8 @@ class _MainScaffoldState extends State<MainScaffold> {
                   child: Icon(Icons.person, size: 40, color: Color(0xFF6200EE)),
                 ),
               ),
-              accountName: Text('profile'.tr()),
-              accountEmail: const Text('student@stustep.com'),
+              accountName: Text(_userName),
+              accountEmail: Text(_userEmail),
               decoration: BoxDecoration(
                 gradient: AppTheme.primaryGradient(context),
               ),
@@ -85,7 +116,14 @@ class _MainScaffoldState extends State<MainScaffold> {
             _buildDrawerItem(
               Icons.logout,
               'logout'.tr(),
-              () {},
+              () async {
+                final navigator = Navigator.of(context);
+                await _authService.signOut();
+                navigator.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              },
               isDestructive: true,
             ),
             const SizedBox(height: 20),

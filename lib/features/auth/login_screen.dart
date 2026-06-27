@@ -1,0 +1,425 @@
+import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import '../../core/services/auth_service.dart';
+import '../../shared/widgets/main_scaffold.dart';
+import 'register_screen.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _authService = AuthService();
+
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await _authService.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScaffold()),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        // Parse Firebase Auth exceptions
+        final errStr = e.toString().toLowerCase();
+        if (errStr.contains('invalid-credential') ||
+            errStr.contains('user-not-found') ||
+            errStr.contains('wrong-password') ||
+            errStr.contains('invalid-email')) {
+          _errorMessage = 'invalid_credentials'.tr();
+        } else {
+          _errorMessage = 'error_occurred'.tr();
+        }
+      });
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final credential = await _authService.signInWithGoogle();
+      if (credential != null && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScaffold()),
+        );
+      } else {
+        // Sign-in canceled or failed
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'error_occurred'.tr();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    // Theme-sensitive branding colors
+    final backgroundColor = isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFFAF6F0);
+    final cardColor = isDarkMode ? const Color(0xFF2A2A2A) : Colors.white;
+    final inputColor = isDarkMode ? const Color(0xFF333333) : const Color(0xFFF4EFE6);
+    const primaryBlue = Color(0xFF1E3A8A);
+    const accentBlue = Color(0xFF3B82F6);
+    final textColor = isDarkMode ? Colors.white : const Color(0xFF1F2937);
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 20),
+                  // Logo / Icon
+                  FadeInDown(
+                    duration: const Duration(milliseconds: 1000),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: primaryBlue.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.school_rounded,
+                          size: 72,
+                          color: primaryBlue,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Titles
+                  FadeInDown(
+                    duration: const Duration(milliseconds: 1000),
+                    delay: const Duration(milliseconds: 200),
+                    child: Column(
+                      children: [
+                        Text(
+                          'login_title'.tr(),
+                          style: theme.textTheme.displayMedium?.copyWith(
+                            color: primaryBlue,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'login_subtitle'.tr(),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: textColor.withValues(alpha: 0.6),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Floating Card Form
+                  FadeInUp(
+                    duration: const Duration(milliseconds: 1000),
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Email Field
+                          Text(
+                            'email'.tr(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: textColor.withValues(alpha: 0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            style: TextStyle(color: textColor),
+                            decoration: InputDecoration(
+                              hintText: 'student@stustep.com',
+                              hintStyle: TextStyle(color: textColor.withValues(alpha: 0.4)),
+                              filled: true,
+                              fillColor: inputColor,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              prefixIcon: Icon(Icons.email_outlined, color: primaryBlue),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'field_required'.tr();
+                              }
+                              final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              if (!emailRegExp.hasMatch(value.trim())) {
+                                return 'invalid_email'.tr();
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Password Field
+                          Text(
+                            'password'.tr(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: textColor.withValues(alpha: 0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.done,
+                            style: TextStyle(color: textColor),
+                            decoration: InputDecoration(
+                              hintText: '••••••••',
+                              hintStyle: TextStyle(color: textColor.withValues(alpha: 0.4)),
+                              filled: true,
+                              fillColor: inputColor,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              prefixIcon: Icon(Icons.lock_outline_rounded, color: primaryBlue),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                  color: primaryBlue.withValues(alpha: 0.7),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'field_required'.tr();
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _handleLogin(),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Error Message Section
+                          if (_errorMessage != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.red.shade200),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        _errorMessage!,
+                                        style: TextStyle(
+                                          color: Colors.red.shade800,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                          // Login Button / Spinner
+                          SizedBox(
+                            height: 52,
+                            child: _isLoading
+                                ? Center(
+                                    child: SpinKitThreeBounce(
+                                      color: primaryBlue,
+                                      size: 32,
+                                    ),
+                                  )
+                                : ElevatedButton(
+                                    onPressed: _handleLogin,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: primaryBlue,
+                                      foregroundColor: Colors.white,
+                                      elevation: 2,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'login'.tr(),
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // OR Divider
+                          Row(
+                            children: [
+                              Expanded(child: Divider(color: textColor.withValues(alpha: 0.15))),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Text(
+                                  'or_divider'.tr(),
+                                  style: TextStyle(
+                                    color: textColor.withValues(alpha: 0.4),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              Expanded(child: Divider(color: textColor.withValues(alpha: 0.15))),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Google Sign-In Button
+                          SizedBox(
+                            height: 52,
+                            child: _isLoading
+                                ? const SizedBox.shrink()
+                                : OutlinedButton.icon(
+                                    onPressed: _handleGoogleSignIn,
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(color: primaryBlue.withValues(alpha: 0.2)),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    icon: const FaIcon(
+                                      FontAwesomeIcons.google,
+                                      color: Color(0xFF1E3A8A),
+                                      size: 20,
+                                    ),
+                                    label: Text(
+                                      'continue_with_google'.tr(),
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Register Redirection
+                  FadeInUp(
+                    duration: const Duration(milliseconds: 1000),
+                    delay: const Duration(milliseconds: 200),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: accentBlue,
+                      ),
+                      child: Text(
+                        'dont_have_account'.tr(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

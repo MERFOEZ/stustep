@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "611121520187",
+    "project_id": "stustep-app-99",
+    "storage_bucket": "stustep-app-99.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611121520187:android:2e7ba4a0b1490d0133c61e",
+        "android_client_info": {
+          "package_name": "com.example.stustep"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "611121520187-5784en371onui36466vcch9mhb1ast09.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.stustep",
+            "certificate_hash": "a5a3498ffa1211c69cb7241e897f8871a860d90f"
+          }
+        },
+        {
+          "client_id": "611121520187-120jea3gh0pko45ocl2aruo1i40qcp0q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8wPV5UQ_JA75f5GMKjJecrF-8b5QFq88"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "611121520187-120jea3gh0pko45ocl2aruo1i40qcp0q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "611121520187-02kgpu68oq9tshgjn9v4svuff2r674vn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.stustep"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
