@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -45,15 +46,23 @@ class AuthService {
       );
 
       // Update user display name in Firebase Auth
-      await userCredential.user?.updateDisplayName(name.trim());
+      try {
+        await userCredential.user?.updateDisplayName(name.trim());
+      } catch (displayNameError) {
+        debugPrint('Failed to update display name in Firebase Auth: $displayNameError');
+      }
 
       // Create a user document in Firestore
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'uid': userCredential.user!.uid,
-        'name': name.trim(),
-        'email': email.trim().toLowerCase(),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      try {
+        await _firestore.collection('users').doc(userCredential.user!.uid).set({
+          'uid': userCredential.user!.uid,
+          'name': name.trim(),
+          'email': email.trim().toLowerCase(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      } catch (firestoreError) {
+        debugPrint('Failed to create user document in Firestore: $firestoreError');
+      }
 
       return userCredential;
     } catch (e) {
@@ -80,15 +89,19 @@ class AuthService {
 
       if (user != null) {
         // Check if user already exists in Firestore 'users' collection
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
-        if (!userDoc.exists) {
-          // Create a new user document
-          await _firestore.collection('users').doc(user.uid).set({
-            'uid': user.uid,
-            'name': user.displayName ?? 'Student',
-            'email': user.email?.toLowerCase() ?? '',
-            'createdAt': FieldValue.serverTimestamp(),
-          });
+        try {
+          final userDoc = await _firestore.collection('users').doc(user.uid).get();
+          if (!userDoc.exists) {
+            // Create a new user document
+            await _firestore.collection('users').doc(user.uid).set({
+              'uid': user.uid,
+              'name': user.displayName ?? 'Student',
+              'email': user.email?.toLowerCase() ?? '',
+              'createdAt': FieldValue.serverTimestamp(),
+            });
+          }
+        } catch (firestoreError) {
+          debugPrint('Failed to check/create user document in Firestore during Google Sign In: $firestoreError');
         }
       }
 
@@ -119,3 +132,4 @@ class AuthService {
     }
   }
 }
+

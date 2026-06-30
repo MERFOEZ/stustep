@@ -109,5 +109,14 @@
   "invalid_email": "Please enter a valid email address",
   "password_too_short": "Password must be at least 6 characters long",
   "continue_with_google": "Continue with Google",
-  "or_divider": "OR"
+  "or_divider": "OR",
+  "no_groups_found": "No groups found in this category",
+  "no_results_found": "No results found",
+  "reply": "Reply",
+  "delete": "Delete",
+  "delete_message_title": "Delete Message",
+  "delete_message_confirm": "Are you sure you want to permanently delete this message?",
+  "cancel": "Cancel",
+  "choose_video": "Choose Video",
+  "choose_docs": "Choose Document"
 }

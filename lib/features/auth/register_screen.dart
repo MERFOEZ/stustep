@@ -56,6 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     } catch (e) {
+      debugPrint("Register error: $e");
       setState(() {
         _isLoading = false;
         // Parse Firebase Auth exceptions
@@ -92,6 +93,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     } catch (e) {
+      debugPrint("Google Sign In error in register: $e");
       setState(() {
         _isLoading = false;
         _errorMessage = 'error_occurred'.tr();
@@ -118,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: primaryBlue),
+          icon: const Icon(Icons.arrow_back_ios_new, color: primaryBlue),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -142,7 +144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: primaryBlue.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.person_add_rounded,
                           size: 64,
                           color: primaryBlue,
@@ -224,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
-                              prefixIcon: Icon(Icons.person_outline, color: primaryBlue),
+                              prefixIcon: const Icon(Icons.person_outline, color: primaryBlue),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -259,7 +261,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
-                              prefixIcon: Icon(Icons.email_outlined, color: primaryBlue),
+                              prefixIcon: const Icon(Icons.email_outlined, color: primaryBlue),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -298,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
-                              prefixIcon: Icon(Icons.lock_outline_rounded, color: primaryBlue),
+                              prefixIcon: const Icon(Icons.lock_outline_rounded, color: primaryBlue),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -358,7 +360,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           SizedBox(
                             height: 52,
                             child: _isLoading
-                                ? Center(
+                                ? const Center(
                                     child: SpinKitThreeBounce(
                                       color: primaryBlue,
                                       size: 32,
