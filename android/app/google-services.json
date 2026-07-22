@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "165136018294",
+    "project_id": "stustep-4c1ea",
+    "storage_bucket": "stustep-4c1ea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:165136018294:android:1890c30e102959dbfc6857",
+        "android_client_info": {
+          "package_name": "com.example.stustep"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI9HImzJaeujqnsvRUrKgtDljWrCg6rd0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

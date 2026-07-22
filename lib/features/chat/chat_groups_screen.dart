@@ -168,7 +168,7 @@ class ChatGroupsScreen extends StatelessWidget {
                           },
                           child: Stack(
                             children: [
-                              PositionedDirectional(
+                              const PositionedDirectional(
                                 end: -20,
                                 top: -20,
                                 child: Opacity(
