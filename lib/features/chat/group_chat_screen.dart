@@ -265,14 +265,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             if (!isMe) ...[
               CircleAvatar(
                 radius: 16,
-                backgroundColor: widget.gradient.colors.first.withValues(
+                backgroundColor: (widget.gradient as LinearGradient).colors.first.withValues(
                   alpha: 0.2,
                 ),
                 child: Text(
                   msg['sender'][0],
                   style: TextStyle(
                     fontSize: 12,
-                    color: widget.gradient.colors.first,
+                    color: (widget.gradient as LinearGradient).colors.first,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

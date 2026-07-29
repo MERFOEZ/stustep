@@ -48,6 +48,11 @@ dependencies:
   file_picker: ^10.3.10
   image_picker_platform_interface: ^2.11.1
   path: ^1.9.1
+  video_player: ^2.9.2
+  encrypt: ^5.0.3
+  cloud_firestore: ^6.7.1
+  firebase_core: ^4.12.1
+  chewie: ^1.13.1
 
 dev_dependencies:
   flutter_test:
