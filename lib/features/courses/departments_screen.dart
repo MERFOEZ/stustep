@@ -160,9 +160,7 @@ class DepartmentsScreen extends StatelessWidget {
                         ).createShader(bounds),
                         child: Text(
                           'departments'.tr(),
-                          style: Theme.of(context)
-                              .textTheme
-                              .displaySmall
+                          style: Theme.of(context).textTheme.displaySmall
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -176,37 +174,33 @@ class DepartmentsScreen extends StatelessWidget {
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final doc = docs[index];
-                        final data = doc.data() as Map<String, dynamic>;
-                        final name = data['name'] as String? ?? '';
-                        final gradient =
-                            _gradients[index % _gradients.length];
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final doc = docs[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      final name = data['name'] as String? ?? '';
+                      final gradient = _gradients[index % _gradients.length];
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _buildDepartmentCard(
-                            context,
-                            name: name,
-                            gradient: gradient,
-                            delay: index * 120,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CoursesScreen(
-                                    departmentId: doc.id,
-                                    departmentName: name,
-                                  ),
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _buildDepartmentCard(
+                          context,
+                          name: name,
+                          gradient: gradient,
+                          delay: index * 120,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CoursesScreen(
+                                  departmentId: doc.id,
+                                  departmentName: name,
                                 ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                      childCount: docs.length,
-                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }, childCount: docs.length),
                   ),
                 ),
               ],
@@ -249,10 +243,10 @@ class DepartmentsScreen extends StatelessWidget {
             child: Stack(
               children: [
                 // Background icon watermark
-                PositionedDirectional(
+                const PositionedDirectional(
                   end: -15,
                   bottom: -15,
-                  child: const Opacity(
+                  child: Opacity(
                     opacity: 0.12,
                     child: Icon(
                       Icons.category_rounded,

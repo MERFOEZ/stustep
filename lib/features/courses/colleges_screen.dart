@@ -4,9 +4,14 @@ import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'departments_screen.dart';
 
-class CollegesScreen extends StatelessWidget {
+class CollegesScreen extends StatefulWidget {
   const CollegesScreen({super.key});
 
+  @override
+  State<CollegesScreen> createState() => _CollegesScreenState();
+}
+
+class _CollegesScreenState extends State<CollegesScreen> {
   // Curated gradients for college cards
   static const List<LinearGradient> _gradients = [
     LinearGradient(colors: [Color(0xFF6200EE), Color(0xFF9C27B0)]),
@@ -68,6 +73,7 @@ class CollegesScreen extends StatelessWidget {
               FirebaseFirestore.instance.collection('colleges').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
+              print('=== APP_STATE: Loading... ===');
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -94,6 +100,7 @@ class CollegesScreen extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
+              print('=== APP_ERROR: ${snapshot.error} ===');
               return Center(
                 child: FadeIn(
                   child: Column(
@@ -113,6 +120,20 @@ class CollegesScreen extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('إعادة المحاولة'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -120,6 +141,7 @@ class CollegesScreen extends StatelessWidget {
             }
 
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              print('=== APP_STATE: No Data or Empty ===');
               return Center(
                 child: FadeIn(
                   child: Column(
@@ -146,6 +168,7 @@ class CollegesScreen extends StatelessWidget {
             }
 
             final docs = snapshot.data!.docs;
+            print('=== APP_SUCCESS: Found ${docs.length} colleges ===');
 
             return CustomScrollView(
               slivers: [
@@ -187,9 +210,16 @@ class CollegesScreen extends StatelessWidget {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final doc = docs[index];
-                        final data = doc.data() as Map<String, dynamic>;
-                        final name = data['name'] as String? ?? '';
-                        final iconName = data['icon'] as String?;
+                        String name = '';
+                        String? iconName;
+                        try {
+                          final data = doc.data() as Map<String, dynamic>? ?? {};
+                          print('--- Mapping doc ${doc.id}: $data ---');
+                          name = data['name'] as String? ?? '';
+                          iconName = data['icon'] as String?;
+                        } catch (e) {
+                          print('=== APP_MAPPING_ERROR: Failed to map doc ${doc.id}: $e ===');
+                        }
                         final gradient =
                             _gradients[index % _gradients.length];
                         final icon = _getCollegeIcon(iconName);
