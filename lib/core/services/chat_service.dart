@@ -16,6 +16,27 @@ class ChatService {
 
   /// Listen to groups in real-time filtered by category.
   /// Sorts by lastMessageTime descending in-memory to prevent requiring composite indexes.
+  static final List<GroupModel> defaultGroups = [
+    GroupModel(
+      id: 'engineering_group',
+      name: 'مناقشة الهندسة ⚙️',
+      category: 'Engineering',
+      description: 'تجمع النخبة الهندسية والمشاريع التقنية',
+      members: [],
+      lastMessage: '',
+      lastMessageTime: Timestamp.now(),
+    ),
+    GroupModel(
+      id: 'medical_group',
+      name: 'مناقشة الطبية 🩺',
+      category: 'Medicine',
+      description: 'ملتقى أطباء المستقبل والعلوم الصحية',
+      members: [],
+      lastMessage: '',
+      lastMessageTime: Timestamp.now(),
+    ),
+  ];
+
   /// Listen to all groups in Firestore.
   Stream<List<GroupModel>> getGroups() {
     return _firestore
@@ -25,9 +46,15 @@ class ChatService {
       final groups = snapshot.docs
           .map((doc) => GroupModel.fromFirestore(doc))
           .toList();
+      if (groups.isEmpty) {
+        return defaultGroups;
+      }
       // Sort descending by lastMessageTime
       groups.sort((a, b) => b.lastMessageTime.compareTo(a.lastMessageTime));
       return groups;
+    }).handleError((e) {
+      debugPrint('Error fetching groups from Firestore: $e');
+      return defaultGroups;
     });
   }
 

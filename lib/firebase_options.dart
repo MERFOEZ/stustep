@@ -25,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -47,29 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDrWrVmpE2odhHON3TC9CovgewzpF3nXys',
-    appId: '1:611121520187:web:29098cb4172942f633c61e',
-    messagingSenderId: '611121520187',
-    projectId: 'stustep-app-99',
-    authDomain: 'stustep-app-99.firebaseapp.com',
-    storageBucket: 'stustep-app-99.firebasestorage.app',
+    apiKey: 'AIzaSyA-dCwcS4V2cRToHeRwxF8VyOj2Kf7SOpo',
+    appId: '1:165136018294:web:453efc30560fd4b8fc6857',
+    messagingSenderId: '165136018294',
+    projectId: 'stustep-4c1ea',
+    authDomain: 'stustep-4c1ea.firebaseapp.com',
+    storageBucket: 'stustep-4c1ea.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA8wPV5UQ_JA75f5GMKjJecrF-8b5QFq88',
-    appId: '1:611121520187:android:2e7ba4a0b1490d0133c61e',
-    messagingSenderId: '611121520187',
-    projectId: 'stustep-app-99',
-    storageBucket: 'stustep-app-99.firebasestorage.app',
+    apiKey: 'AIzaSyCI9HImzJaeujqnsvRUrKgtDljWrCg6rd0',
+    appId: '1:165136018294:android:1890c30e102959dbfc6857',
+    messagingSenderId: '165136018294',
+    projectId: 'stustep-4c1ea',
+    storageBucket: 'stustep-4c1ea.firebasestorage.app',
   );
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAbyQSIjAUGcduUaBQ5c8pL13uBvUk2vaY',
-    appId: '1:611121520187:ios:a6cdaa2292216e8b33c61e',
-    messagingSenderId: '611121520187',
-    projectId: 'stustep-app-99',
-    storageBucket: 'stustep-app-99.firebasestorage.app',
-    androidClientId: '611121520187-5784en371onui36466vcch9mhb1ast09.apps.googleusercontent.com',
-    iosClientId: '611121520187-02kgpu68oq9tshgjn9v4svuff2r674vn.apps.googleusercontent.com',
+    apiKey: 'AIzaSyDs8DIQjxYZGHAmaMZdwn0RQToxm3C5TpU',
+    appId: '1:165136018294:ios:223a27f1dc62f06cfc6857',
+    messagingSenderId: '165136018294',
+    projectId: 'stustep-4c1ea',
+    storageBucket: 'stustep-4c1ea.firebasestorage.app',
+    androidClientId: '165136018294-3h92596n21j0v0kqh91hp5jjgm1q4drp.apps.googleusercontent.com',
+    iosClientId: '165136018294-adktbn0dkrt8qdm9tgbef8udg1920h5l.apps.googleusercontent.com',
     iosBundleId: 'com.example.stustep',
+  );
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDs8DIQjxYZGHAmaMZdwn0RQToxm3C5TpU',
+    appId: '1:165136018294:ios:223a27f1dc62f06cfc6857',
+    messagingSenderId: '165136018294',
+    projectId: 'stustep-4c1ea',
+    storageBucket: 'stustep-4c1ea.firebasestorage.app',
+    androidClientId: '165136018294-3h92596n21j0v0kqh91hp5jjgm1q4drp.apps.googleusercontent.com',
+    iosClientId: '165136018294-adktbn0dkrt8qdm9tgbef8udg1920h5l.apps.googleusercontent.com',
+    iosBundleId: 'com.example.stustep',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyA-dCwcS4V2cRToHeRwxF8VyOj2Kf7SOpo',
+    appId: '1:165136018294:web:453efc30560fd4b8fc6857',
+    messagingSenderId: '165136018294',
+    projectId: 'stustep-4c1ea',
+    authDomain: 'stustep-4c1ea.firebaseapp.com',
+    storageBucket: 'stustep-4c1ea.firebasestorage.app',
   );
 }

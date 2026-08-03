@@ -1,45 +1,45 @@
 {
   "project_info": {
-    "project_number": "611121520187",
-    "project_id": "stustep-app-99",
-    "storage_bucket": "stustep-app-99.firebasestorage.app"
+    "project_number": "165136018294",
+    "project_id": "stustep-4c1ea",
+    "storage_bucket": "stustep-4c1ea.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:611121520187:android:2e7ba4a0b1490d0133c61e",
+        "mobilesdk_app_id": "1:165136018294:android:1890c30e102959dbfc6857",
         "android_client_info": {
           "package_name": "com.example.stustep"
         }
       },
       "oauth_client": [
         {
-          "client_id": "611121520187-5784en371onui36466vcch9mhb1ast09.apps.googleusercontent.com",
+          "client_id": "165136018294-3h92596n21j0v0kqh91hp5jjgm1q4drp.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.stustep",
-            "certificate_hash": "a5a3498ffa1211c69cb7241e897f8871a860d90f"
+            "certificate_hash": "1193b2e44c678f9fcfbabf8c0ad690516ad0fed1"
           }
         },
         {
-          "client_id": "611121520187-120jea3gh0pko45ocl2aruo1i40qcp0q.apps.googleusercontent.com",
+          "client_id": "165136018294-5tpkdj2mov98vffev3bfkc0l2b2p8161.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA8wPV5UQ_JA75f5GMKjJecrF-8b5QFq88"
+          "current_key": "AIzaSyCI9HImzJaeujqnsvRUrKgtDljWrCg6rd0"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "611121520187-120jea3gh0pko45ocl2aruo1i40qcp0q.apps.googleusercontent.com",
+              "client_id": "165136018294-5tpkdj2mov98vffev3bfkc0l2b2p8161.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "611121520187-02kgpu68oq9tshgjn9v4svuff2r674vn.apps.googleusercontent.com",
+              "client_id": "165136018294-adktbn0dkrt8qdm9tgbef8udg1920h5l.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.example.stustep"

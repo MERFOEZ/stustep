@@ -95,21 +95,11 @@ class _ChatGroupsScreenState extends State<ChatGroupsScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return Center(child: Text('error_occurred'.tr()));
+              debugPrint('Error loading groups stream: ${snapshot.error}');
             }
-            final groups = snapshot.data ?? [];
-            if (groups.isEmpty) {
-              return Center(
-                child: Text(
-                  'no_groups_found'.tr(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
-                  ),
-                ),
-              );
-            }
+            final groups = (snapshot.hasData && snapshot.data!.isNotEmpty)
+                ? snapshot.data!
+                : ChatService.defaultGroups;
 
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
