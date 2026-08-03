@@ -51,7 +51,7 @@ class _AIChatScreenState extends State<AIChatScreen>
 
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty && _attachedFile == null || _isTyping) return;
+    if ((text.isEmpty && _attachedFile == null) || _isTyping) return;
 
     String? base64Image;
     if (_attachedFile != null && (_attachedFileType == 'image')) {

@@ -166,6 +166,7 @@ class _ChatGroupsScreenState extends State<ChatGroupsScreen> {
                                       ),
                                     ),
                                   ),
+                                  ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(

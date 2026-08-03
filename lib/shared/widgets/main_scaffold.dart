@@ -6,7 +6,7 @@ import '../../core/services/auth_service.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/ai/ai_chat_screen.dart';
-import '../../features/courses/courses_screen.dart';
+import '../../features/courses/colleges_screen.dart';
 import '../../features/chat/chat_groups_screen.dart';
 import '../../features/downloads/downloads_screen.dart';
 import '../../features/settings/settings_screen.dart';
@@ -28,7 +28,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     const AIChatScreen(),
     const ChatGroupsScreen(),
     const HomeScreen(),
-    const CoursesScreen(),
+    const CollegesScreen(),
     const DownloadsScreen(),
   ];
 
@@ -145,8 +145,8 @@ class _MainScaffoldState extends State<MainScaffold> {
             Expanded(
               child: _buildNavItem(
                 3,
-                Icons.play_circle_rounded,
-                'courses'.tr(),
+                Icons.account_balance_rounded,
+                'colleges'.tr(),
               ),
             ),
             Expanded(
@@ -217,7 +217,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       case 2:
         return 'home'.tr();
       case 3:
-        return 'courses'.tr();
+        return 'colleges'.tr();
       case 4:
         return 'downloads'.tr();
       default:

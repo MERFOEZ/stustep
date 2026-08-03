@@ -2,51 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/theme/app_theme.dart';
-import 'course_detail_screen.dart';
+import 'departments_screen.dart';
 
-class CoursesScreen extends StatelessWidget {
-  final String departmentId;
-  final String departmentName;
+class CollegesScreen extends StatefulWidget {
+  const CollegesScreen({super.key});
 
-  const CoursesScreen({
-    super.key,
-    required this.departmentId,
-    required this.departmentName,
-  });
+  @override
+  State<CollegesScreen> createState() => _CollegesScreenState();
+}
 
-  // Pre-defined gradients to use for course cards
+class _CollegesScreenState extends State<CollegesScreen> {
+  // Curated gradients for college cards
   static const List<LinearGradient> _gradients = [
     LinearGradient(colors: [Color(0xFF6200EE), Color(0xFF9C27B0)]),
-    LinearGradient(colors: [Color(0xFFD500F9), Color(0xFFE040FB)]),
     LinearGradient(colors: [Color(0xFF00C853), Color(0xFF00E676)]),
+    LinearGradient(colors: [Color(0xFFD500F9), Color(0xFFE040FB)]),
     LinearGradient(colors: [Color(0xFFFF1744), Color(0xFFFF5252)]),
     LinearGradient(colors: [Color(0xFFFFAB00), Color(0xFFFFD54F)]),
     LinearGradient(colors: [Color(0xFF00BCD4), Color(0xFF00E5FF)]),
+    LinearGradient(colors: [Color(0xFF304FFE), Color(0xFF448AFF)]),
+    LinearGradient(colors: [Color(0xFFFF6D00), Color(0xFFFF9100)]),
   ];
+
+  // Icon mapping for common college types
+  static IconData _getCollegeIcon(String? iconName) {
+    switch (iconName) {
+      case 'engineering':
+        return Icons.engineering;
+      case 'science':
+        return Icons.science;
+      case 'medical':
+      case 'medicine':
+        return Icons.local_hospital;
+      case 'business':
+        return Icons.business_center;
+      case 'law':
+        return Icons.gavel;
+      case 'arts':
+        return Icons.palette;
+      case 'education':
+        return Icons.school;
+      case 'computer':
+      case 'it':
+        return Icons.computer;
+      case 'pharmacy':
+        return Icons.medication;
+      case 'agriculture':
+        return Icons.eco;
+      default:
+        return Icons.account_balance;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: AppTheme.primaryGradient(context),
-          ),
-        ),
-        title: Text(
-          departmentName,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -54,17 +64,16 @@ class CoursesScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Theme.of(context).scaffoldBackgroundColor,
-              const Color(0xFF6200EE).withValues(alpha: 0.05),
+              Theme.of(context).primaryColor.withValues(alpha: 0.05),
             ],
           ),
         ),
         child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('courses')
-              .where('departmentId', isEqualTo: departmentId)
-              .snapshots(),
+          stream:
+              FirebaseFirestore.instance.collection('colleges').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
+              print('=== APP_STATE: Loading... ===');
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -91,6 +100,7 @@ class CoursesScreen extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
+              print('=== APP_ERROR: ${snapshot.error} ===');
               return Center(
                 child: FadeIn(
                   child: Column(
@@ -110,6 +120,20 @@ class CoursesScreen extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('إعادة المحاولة'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -117,19 +141,20 @@ class CoursesScreen extends StatelessWidget {
             }
 
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              print('=== APP_STATE: No Data or Empty ===');
               return Center(
                 child: FadeIn(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.play_circle_outline_rounded,
+                        Icons.account_balance_outlined,
                         size: 80,
                         color: Colors.grey.shade400,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'no_courses'.tr(),
+                        'no_colleges'.tr(),
                         style: TextStyle(
                           color: Colors.grey.shade500,
                           fontSize: 18,
@@ -143,10 +168,11 @@ class CoursesScreen extends StatelessWidget {
             }
 
             final docs = snapshot.data!.docs;
+            print('=== APP_SUCCESS: Found ${docs.length} colleges ===');
 
             return CustomScrollView(
               slivers: [
-                // Section header
+                // Header
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
@@ -157,7 +183,7 @@ class CoursesScreen extends StatelessWidget {
                           colors: [Color(0xFF6200EE), Color(0xFFE91E63)],
                         ).createShader(bounds),
                         child: Text(
-                          'courses'.tr(),
+                          'colleges'.tr(),
                           style: Theme.of(context)
                               .textTheme
                               .displaySmall
@@ -170,37 +196,51 @@ class CoursesScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Grid of courses
+                // Grid of colleges
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
                   sliver: SliverGrid(
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      childAspectRatio: 0.85,
+                      childAspectRatio: 0.9,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final doc = docs[index];
-                        final data = doc.data() as Map<String, dynamic>;
-                        final title = data['title'] as String? ?? 'بدون عنوان';
-                        final coverImage =
-                            data['cover_image'] as String? ?? '';
-                        final lectures =
-                            data['lectures'] as List<dynamic>? ?? [];
+                        String name = '';
+                        String? iconName;
+                        try {
+                          final data = doc.data() as Map<String, dynamic>? ?? {};
+                          print('--- Mapping doc ${doc.id}: $data ---');
+                          name = data['name'] as String? ?? '';
+                          iconName = data['icon'] as String?;
+                        } catch (e) {
+                          print('=== APP_MAPPING_ERROR: Failed to map doc ${doc.id}: $e ===');
+                        }
                         final gradient =
                             _gradients[index % _gradients.length];
+                        final icon = _getCollegeIcon(iconName);
 
-                        return _buildCourseCard(
+                        return _buildCollegeCard(
                           context,
-                          courseId: doc.id,
-                          title: title,
-                          coverImage: coverImage,
-                          lectures: lectures,
+                          name: name,
+                          icon: icon,
                           gradient: gradient,
                           delay: index * 100,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DepartmentsScreen(
+                                  collegeId: doc.id,
+                                  collegeName: name,
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                       childCount: docs.length,
@@ -215,14 +255,13 @@ class CoursesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCourseCard(
+  Widget _buildCollegeCard(
     BuildContext context, {
-    required String courseId,
-    required String title,
-    required String coverImage,
-    required List<dynamic> lectures,
+    required String name,
+    required IconData icon,
     required LinearGradient gradient,
     required int delay,
+    required VoidCallback onTap,
   }) {
     return ElasticIn(
       delay: Duration(milliseconds: delay),
@@ -230,11 +269,11 @@ class CoursesScreen extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           gradient: gradient,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
               color: gradient.colors.first.withValues(alpha: 0.4),
-              blurRadius: 16,
+              blurRadius: 18,
               offset: const Offset(0, 8),
               spreadRadius: 2,
             ),
@@ -243,51 +282,23 @@ class CoursesScreen extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(22),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CourseDetailScreen(
-                    courseId: courseId,
-                    title: title,
-                    coverImage: coverImage,
-                    gradient: gradient,
-                    lectures: lectures,
-                  ),
-                ),
-              );
-            },
+            borderRadius: BorderRadius.circular(24),
+            onTap: onTap,
             child: Stack(
               children: [
-                // Background cover image watermark
+                // Background icon watermark
                 PositionedDirectional(
-                  end: -20,
-                  top: -20,
+                  end: -25,
+                  top: -25,
                   child: Opacity(
-                    opacity: 0.2,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(60),
-                      child: coverImage.isEmpty
-                          ? const Icon(Icons.book, size: 120, color: Colors.white)
-                          : Image.network(
-                              coverImage,
-                              width: 120,
-                              height: 120,
-                              fit: BoxFit.cover,
-                              errorBuilder: (ctx, err, stack) => const Icon(
-                                Icons.book,
-                                size: 120,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
+                    opacity: 0.15,
+                    child: Icon(icon, size: 140, color: Colors.white),
                   ),
                 ),
                 // Glassmorphism overlay
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(24),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -300,37 +311,33 @@ class CoursesScreen extends StatelessWidget {
                 ),
                 // Content
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.3),
+                          color: Colors.white.withValues(alpha: 0.25),
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 10,
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
-                        child: ClipOval(
-                          child: coverImage.isEmpty
-                              ? const Icon(Icons.book, size: 32, color: Colors.white)
-                              : Image.network(
-                                  coverImage,
-                                  width: 32,
-                                  height: 32,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (ctx, err, stack) =>
-                                      const Icon(Icons.book, size: 32, color: Colors.white),
-                                ),
-                        ),
+                        child: Icon(icon, color: Colors.white, size: 32),
                       ),
                       const Spacer(),
                       Text(
-                        title,
+                        name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
                           fontSize: 16,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           shadows: [
                             Shadow(
@@ -341,12 +348,21 @@ class CoursesScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${lectures.length} ${'lessons'.tr()}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.9),
+                      const SizedBox(height: 6),
+                      // Decorative accent line
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              blurRadius: 6,
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
                       ),
                     ],

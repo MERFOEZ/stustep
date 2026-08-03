@@ -1,313 +1,530 @@
+import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
+import '../../core/services/video_download_service.dart';
+import '../../core/services/video_encryption_service.dart';
 
-class CourseDetailScreen extends StatelessWidget {
+class CourseDetailScreen extends StatefulWidget {
+  final String courseId;
   final String title;
-  final String instructor;
-  final IconData thumbnail;
+  final String coverImage;
   final Gradient gradient;
+  final List<dynamic> lectures;
 
   const CourseDetailScreen({
     super.key,
+    required this.courseId,
     required this.title,
-    required this.instructor,
-    required this.thumbnail,
+    required this.coverImage,
     required this.gradient,
+    required this.lectures,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(context),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+  State<CourseDetailScreen> createState() => _CourseDetailScreenState();
+}
+
+class _CourseDetailScreenState extends State<CourseDetailScreen> {
+  int? _selectedLectureIndex;
+  VideoPlayerController? _videoPlayerController;
+  ChewieController? _chewieController;
+  
+  // Track download states: 'downloaded', 'not_downloaded', or double representing progress
+  final Map<String, dynamic> _downloadStatus = {};
+  String? _currentTempFile;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialDownloadStatus();
+  }
+
+  Future<void> _checkInitialDownloadStatus() async {
+    for (int i = 0; i < widget.lectures.length; i++) {
+      final videoId = _getVideoId(i);
+      final isDownloaded = await VideoDownloadService.isDownloaded(videoId);
+      if (mounted) {
+        setState(() {
+          _downloadStatus[videoId] = isDownloaded ? 'downloaded' : 'not_downloaded';
+        });
+      }
+    }
+  }
+
+  String _getVideoId(int index) {
+    // If the lecture object has an id, use it, else generate one.
+    final lesson = widget.lectures[index] as Map<String, dynamic>?;
+    if (lesson != null && lesson['id'] != null) {
+      return lesson['id'].toString();
+    }
+    // Generate a unique ID based on course title and index if no ID provided
+    return '${widget.title.hashCode}_vid_$index';
+  }
+
+  /// إشعار سينمائي عائم بخلفية زجاجية
+  void _showCinematicSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isError
+                      ? [
+                          Colors.red.shade900.withValues(alpha: 0.7),
+                          Colors.red.shade700.withValues(alpha: 0.5),
+                        ]
+                      : [
+                          const Color(0xFF6200EE).withValues(alpha: 0.7),
+                          const Color(0xFF9C27B0).withValues(alpha: 0.5),
+                        ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Row(
                 children: [
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 600),
-                    child: _buildInfoCards(context),
+                  Icon(
+                    isError ? Icons.error_outline_rounded : Icons.movie_filter_rounded,
+                    color: Colors.white,
+                    size: 24,
                   ),
-                  const SizedBox(height: 30),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 600),
-                    delay: const Duration(milliseconds: 200),
-                    child: _buildAboutSection(context),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 1),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 30),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 600),
-                    delay: const Duration(milliseconds: 400),
-                    child: _buildCurriculumSection(context),
-                  ),
-                  const SizedBox(height: 120),
                 ],
               ),
             ),
           ),
-        ],
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        padding: EdgeInsets.zero,
+        duration: const Duration(seconds: 2),
+        dismissDirection: DismissDirection.horizontal,
       ),
-      bottomSheet: _buildBottomAction(context),
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: 250,
-      pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(gradient: gradient),
-          child: Stack(
-            children: [
-              PositionedDirectional(
-                end: -40,
-                bottom: -40,
-                child: Opacity(
-                  opacity: 0.2,
-                  child: Icon(thumbnail, size: 250, color: Colors.white),
+  Future<void> _playVideo(int index) async {
+    if (_selectedLectureIndex == index) return;
+    
+    setState(() {
+      _selectedLectureIndex = index;
+    });
+
+    await _cleanupPlayer();
+
+    final lesson = widget.lectures[index] as Map<String, dynamic>;
+    final videoUrl = lesson['url']?.toString() ?? '';
+    final videoId = _getVideoId(index);
+
+    print('=== VIDEO_URL_DEBUG: $videoUrl ===');
+
+    if (videoUrl.isEmpty || !videoUrl.startsWith('http')) {
+      if (mounted) {
+        _showCinematicSnackBar('رابط الفيديو غير متوفر أو غير صالح', isError: true);
+      }
+      return;
+    }
+
+    try {
+      final isDownloaded = await VideoDownloadService.isDownloaded(videoId);
+      if (isDownloaded) {
+        final encPath = await VideoEncryptionService.getEncFilePath(videoId);
+        _currentTempFile = await VideoEncryptionService.decryptToTemp(
+          encFilePath: encPath, 
+          videoId: videoId,
+        );
+        _videoPlayerController = VideoPlayerController.file(File(_currentTempFile!));
+      } else {
+        _videoPlayerController = VideoPlayerController.networkUrl(
+          Uri.parse(videoUrl),
+          httpHeaders: const {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+            'Connection': 'keep-alive',
+            'Accept': '*/*',
+          },
+        );
+      }
+
+      await _videoPlayerController!.initialize();
+
+      if (mounted) {
+        setState(() {
+          _chewieController = ChewieController(
+            videoPlayerController: _videoPlayerController!,
+            autoPlay: true,
+            autoInitialize: true,
+            allowedScreenSleep: false,
+            looping: false,
+            aspectRatio: _videoPlayerController!.value.aspectRatio,
+            errorBuilder: (context, errorMessage) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    errorMessage,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
-              ),
+              );
+            },
+          );
+        });
+      }
+    } catch (e) {
+      print('=== VIDEO_INIT_ERROR: $e ===');
+      debugPrint("Error initializing video: $e");
+    }
+  }
+
+  Future<void> _cleanupPlayer() async {
+    _chewieController?.dispose();
+    _chewieController = null;
+    await _videoPlayerController?.dispose();
+    _videoPlayerController = null;
+
+    if (_currentTempFile != null) {
+      await VideoEncryptionService.deleteTemp(_currentTempFile!);
+      _currentTempFile = null;
+    }
+  }
+
+  Future<void> _downloadVideo(int index) async {
+    final lesson = widget.lectures[index] as Map<String, dynamic>;
+    final downloadUrl = lesson['url']?.toString() ?? '';
+    final downloadTitle = lesson['title']?.toString() ?? lesson['name']?.toString() ?? '';
+    final videoId = _getVideoId(index);
+
+    print('=== START DOWNLOADING: $downloadUrl ===');
+
+    if (downloadUrl.isEmpty) {
+      _showCinematicSnackBar('رابط الفيديو غير متوفر للتحميل', isError: true);
+      return;
+    }
+
+    setState(() {
+      _downloadStatus[videoId] = 0.0;
+    });
+
+    // إشعار سينمائي فوري عند بدء التنزيل
+    _showCinematicSnackBar('تم إضافة الفيديو إلى قائمة التنزيلات 🍿');
+
+    try {
+      final String fullTitle = '${widget.title} - $downloadTitle';
+      await VideoDownloadService.downloadAndEncrypt(
+        videoId: videoId,
+        url: downloadUrl,
+        title: fullTitle,
+        courseId: widget.courseId,
+        courseName: widget.title,
+        coverImage: widget.coverImage,
+        onProgress: (progress) {
+          if (mounted) {
+            setState(() {
+              _downloadStatus[videoId] = progress;
+            });
+          }
+        },
+      );
+
+      if (mounted) {
+        setState(() {
+          _downloadStatus[videoId] = 'downloaded';
+        });
+        _showCinematicSnackBar('تم تحميل الدرس بنجاح ✨');
+      }
+    } catch (e) {
+      print('=== DOWNLOAD ERROR: $e ===');
+      if (mounted) {
+        setState(() {
+          _downloadStatus[videoId] = 'not_downloaded';
+        });
+        _showCinematicSnackBar('فشل تحميل الدرس، يرجى المحاولة لاحقاً', isError: true);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _cleanupPlayer();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Column(
+        children: [
+          _buildPlayerSection(),
+          _buildCourseHeader(),
+          Expanded(
+            child: _buildCurriculumSection(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayerSection() {
+    return Container(
+      width: double.infinity,
+      height: 250,
+      decoration: BoxDecoration(
+        gradient: widget.gradient,
+        color: Colors.black,
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            if (_selectedLectureIndex == null)
               Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 40),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Icon(thumbnail, size: 64, color: Colors.white),
+                    Opacity(
+                      opacity: 0.5,
+                      child: widget.coverImage.isEmpty
+                          ? const Icon(Icons.video_library, size: 80, color: Colors.white)
+                          : Image.network(
+                              widget.coverImage,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                              errorBuilder: (ctx, err, stack) => const Icon(Icons.video_library, size: 80, color: Colors.white),
+                            ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      title.tr(),
-                      style: const TextStyle(
-                        fontSize: 24,
+                    const Text(
+                      'اختر درساً للبدء',
+                      style: TextStyle(
+                        color: Colors.white, 
+                        fontSize: 16, 
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(color: Colors.black26, blurRadius: 10),
-                        ],
                       ),
                     ),
                   ],
                 ),
+              )
+            else if (_chewieController != null && _chewieController!.videoPlayerController.value.isInitialized)
+              Chewie(controller: _chewieController!)
+            else
+              const Center(child: CircularProgressIndicator(color: Colors.white)),
+              
+            // Back button overlay
+            Positioned(
+              top: 8,
+              left: 8,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
               ),
-            ],
-          ),
-        ),
-      ),
-      leadingWidth: 70,
-      leading: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CircleAvatar(
-          backgroundColor: Colors.white24,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoCards(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _infoCard(context, Icons.star_rounded, 'rating'.tr(), '4.8'),
-        _infoCard(context, Icons.people_rounded, 'students'.tr(), '1.2k'),
-        _infoCard(
-          context,
-          Icons.timer_rounded,
-          'duration'.tr(),
-          '12 ${'hours'.tr()}',
-        ),
-      ],
-    );
-  }
-
-  Widget _infoCard(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
-    return Container(
-      width: (MediaQuery.of(context).size.width - 60) / 3,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: Theme.of(context).primaryColor, size: 28),
-          const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-          const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAboutSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'about_course'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'course_desc_placeholder'.tr(),
-          style: TextStyle(color: Colors.grey[700], height: 1.6),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCurriculumSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'curriculum'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        _curriculumItem(context, '01', 'lesson_dummy_1'.tr(), '45:00'),
-        _curriculumItem(context, '02', 'lesson_dummy_2'.tr(), '32:00'),
-        _curriculumItem(context, '03', 'lesson_dummy_3'.tr(), '58:00'),
-      ],
-    );
-  }
-
-  Widget _curriculumItem(
-    BuildContext context,
-    String index,
-    String title,
-    String time,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
-      ),
+  Widget _buildCourseHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              index,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  widget.title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                const SizedBox(height: 8),
                 Text(
-                  time,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  '${widget.lectures.length} دروس',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.play_circle_fill, color: Theme.of(context).primaryColor),
         ],
       ),
     );
   }
 
-  Widget _buildBottomAction(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+  Widget _buildCurriculumSection() {
+    if (widget.lectures.isEmpty) {
+      return Center(
+        child: Text(
+          'لا توجد دروس حالياً',
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+        ),
+      );
+    }
+    
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      itemCount: widget.lectures.length,
+      itemBuilder: (context, index) {
+        final lesson = widget.lectures[index] as Map<String, dynamic>;
+        final lessonTitle = lesson['title']?.toString() ?? lesson['name']?.toString() ?? '';
+        final videoUrl = lesson['url']?.toString() ?? '';
+        final videoId = _getVideoId(index);
+        final status = _downloadStatus[videoId] ?? 'not_downloaded';
+        final isSelected = _selectedLectureIndex == index;
+
+        return FadeInUp(
+          duration: const Duration(milliseconds: 400),
+          delay: Duration(milliseconds: index * 50),
+          child: _buildLectureCard(
+            index: index,
+            title: lessonTitle,
+            videoUrl: videoUrl,
+            status: status,
+            isSelected: isSelected,
           ),
-        ],
-      ),
-      child: SafeArea(
-        child: Container(
-          width: double.infinity,
-          height: 60,
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: (gradient as LinearGradient).colors.first.withValues(
-                  alpha: 0.4,
-                ),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
+        );
+      },
+    );
+  }
+
+  Widget _buildLectureCard({
+    required int index,
+    required String title,
+    required String videoUrl,
+    required dynamic status,
+    required bool isSelected,
+  }) {
+    final theme = Theme.of(context);
+    final primary = theme.primaryColor;
+
+    return GestureDetector(
+      onTap: () => _playVideo(index),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? primary.withValues(alpha: 0.08) : theme.cardColor.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: isSelected ? primary.withValues(alpha: 0.5) : Colors.grey.withValues(alpha: 0.1),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Play Icon / Number
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isSelected ? primary : primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+              child: Icon(
+                isSelected ? Icons.pause : Icons.play_arrow,
+                color: isSelected ? Colors.white : primary,
+                size: 20,
               ),
             ),
-            child: Text(
-              'enroll_now'.tr(),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            const SizedBox(width: 16),
+            
+            // Title
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? primary : null,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'الدرس ${(index + 1)}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
               ),
             ),
-          ),
+            
+            // Download Action
+            _buildDownloadAction(index, title, videoUrl, status),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildDownloadAction(int index, String title, String videoUrl, dynamic status) {
+    if (status == 'downloaded') {
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Icon(Icons.check_circle, color: Theme.of(context).primaryColor),
+      );
+    } else if (status is double) {
+      // Downloading
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            value: status,
+            strokeWidth: 2,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+      );
+    } else {
+      // not_downloaded
+      return IconButton(
+        icon: const Icon(Icons.download_rounded, color: Colors.grey),
+        onPressed: () => _downloadVideo(index),
+      );
+    }
   }
 }

@@ -28,6 +28,8 @@
     "typing": "يفكر الآن...",
     "attach_file": "إرفاق ملف",
     "choose_image": "اختيار صورة",
+    "choose_video": "اختيار فيديو",
+    "choose_docs": "اختيار مستند",
     "choose_file": "اختيار مستند",
     "send": "إرسال",
     "general": "عام",
@@ -117,6 +119,20 @@
     "delete_message_title": "حذف الرسالة",
     "delete_message_confirm": "هل أنت متأكد من رغبتك في حذف هذه الرسالة بشكل نهائي؟",
     "cancel": "إلغاء",
-    "choose_video": "اختيار فيديو",
-    "choose_docs": "اختيار مستند"
-}
+    "download_video": "تحميل الفيديو",
+    "downloading": "جاري التحميل...",
+    "downloaded": "محمّل وجاهز",
+    "play_offline": "تشغيل أوفلاين",
+    "streaming_online": "بث مباشر",
+    "delete_download": "حذف التحميل",
+    "encryption_error": "خطأ في التشفير",
+    "decrypting": "جاري فك التشفير...",
+    "video_protected": "الفيديو محمي بتشفير AES-256",
+    "colleges": "الكليات",
+    "departments": "التخصصات",
+    "no_colleges": "لا توجد كليات",
+    "no_departments": "لا توجد تخصصات",
+    "no_courses": "لا توجد دورات",
+    "lessons": "دروس",
+    "error": "حدث خطأ"
+}
