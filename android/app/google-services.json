@@ -12,7 +12,20 @@
           "package_name": "com.example.stustep"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "165136018294-3h92596n21j0v0kqh91hp5jjgm1q4drp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.stustep",
+            "certificate_hash": "1193b2e44c678f9fcfbabf8c0ad690516ad0fed1"
+          }
+        },
+        {
+          "client_id": "165136018294-5tpkdj2mov98vffev3bfkc0l2b2p8161.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCI9HImzJaeujqnsvRUrKgtDljWrCg6rd0"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "165136018294-5tpkdj2mov98vffev3bfkc0l2b2p8161.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "165136018294-adktbn0dkrt8qdm9tgbef8udg1920h5l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.stustep"
+              }
+            }
+          ]
         }
       }
     }
