@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/services/admission_seed_service.dart';
 import '../../core/services/app_config_service.dart';
 import '../../core/theme/app_theme.dart';
 import 'admission_modules.dart';
@@ -53,9 +54,36 @@ class _AdmissionHubScreenState extends State<AdmissionHubScreen> {
     Navigator.push(context, MaterialPageRoute(builder: builder));
   }
 
+  /// زر استيراد البيانات الأولية — يظهر في وضع التطوير فقط وبتفعيل يدوي.
+  /// يُحذف ظهوره تلقائياً في نسخة الإصدار.
+  Future<void> _runSeeder() async {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Seeding admission data...')),
+    );
+    final result = await AdmissionSeedService().seed();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          result.success
+              ? 'Seeded ${result.totalDocuments} documents: ${result.written}'
+              : 'Seeding failed: ${result.error}',
+        ),
+        duration: const Duration(seconds: 6),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: AdmissionSeedService.isAvailable
+          ? FloatingActionButton.extended(
+              onPressed: _runSeeder,
+              icon: const Icon(Icons.cloud_upload_rounded),
+              label: const Text('Seed data'),
+            )
+          : null,
       appBar: AdmissionAppBar(title: 'admission.title'.tr()),
       body: Container(
         decoration: BoxDecoration(
