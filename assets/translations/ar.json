@@ -134,5 +134,104 @@
     "no_departments": "لا توجد تخصصات",
     "no_courses": "لا توجد دورات",
     "lessons": "دروس",
-    "error": "حدث خطأ"
+    "error": "حدث خطأ",
+    "admission": {
+        "title": "بوابة القبول الجامعي",
+        "subtitle": "كل ما تحتاجه قبل التسجيل",
+        "coming_soon": "هذا القسم قيد التطوير",
+        "soon_badge": "قريباً",
+        "loading": "جاري التحميل...",
+        "empty": "لا توجد بيانات لعرضها",
+        "error": "حدث خطأ، حاول مرة أخرى",
+        "retry": "إعادة المحاولة",
+        "modules": {
+            "guide": {
+                "title": "دليل الكليات والتخصصات",
+                "desc": "تعرّف على كل تخصص ومواده ومجالات عمله"
+            },
+            "requirements": {
+                "title": "شروط القبول",
+                "desc": "الشهادات والمعدلات والأوراق المطلوبة"
+            },
+            "housing": {
+                "title": "السكنات الطلابية",
+                "desc": "سكنات قريبة من الجامعة بأسعارها"
+            },
+            "exam_papers": {
+                "title": "نماذج الاختبارات",
+                "desc": "نماذج سابقة مصنّفة حسب الكلية"
+            },
+            "matcher": {
+                "title": "مساعد اختيار التخصص",
+                "desc": "اقتراحات تناسب معدلك واهتماماتك"
+            }
+        },
+        "certificate_type": {
+            "yemeni_general": "ثانوية عامة",
+            "azhari": "ثانوية أزهرية",
+            "technical_diploma": "دبلوم فني",
+            "foreign_equivalent": "شهادة أجنبية معادَلة"
+        },
+        "track": {
+            "scientific": "علمي",
+            "literary": "أدبي",
+            "commercial": "تجاري",
+            "technical": "تقني"
+        },
+        "gpa_scale": {
+            "percentage": "نسبة مئوية",
+            "gpa4": "من 4.0",
+            "gpa5": "من 5.0",
+            "grade": "تقدير"
+        },
+        "eligibility": {
+            "eligible": "مؤهل",
+            "borderline": "قريب من الشرط",
+            "not_eligible": "غير مؤهل"
+        },
+        "reason": {
+            "certificate_type": "نوع الشهادة غير مقبول في هذه الكلية",
+            "track": "المسار الدراسي غير مقبول في هذه الكلية",
+            "gpa": "المعدل أقل من الحد الأدنى المطلوب",
+            "certificate_age": "الشهادة أقدم من المدة المسموح بها",
+            "equivalency": "الشهادة تحتاج معادلة من وزارة التربية",
+            "subject_grade": "درجة إحدى المواد المشترطة أقل من المطلوب"
+        },
+        "housing_status": {
+            "available": "متاح",
+            "full": "ممتلئ"
+        },
+        "housing_gender": {
+            "male": "طلاب",
+            "female": "طالبات",
+            "family": "عائلات"
+        },
+        "paper_type": {
+            "midterm": "نصفي",
+            "final": "نهائي",
+            "quiz": "اختبار قصير",
+            "model": "نموذج"
+        },
+        "moderation": {
+            "published": "منشور",
+            "pending": "قيد المراجعة",
+            "rejected": "مرفوض"
+        },
+        "interests": {
+            "math": "الرياضيات",
+            "programming": "البرمجة",
+            "biology": "الأحياء",
+            "chemistry": "الكيمياء",
+            "physics": "الفيزياء",
+            "design": "التصميم",
+            "writing": "الكتابة",
+            "business": "الأعمال والإدارة",
+            "teaching": "التعليم",
+            "helping_people": "مساعدة الناس",
+            "law_justice": "القانون والعدالة",
+            "languages": "اللغات",
+            "electronics": "الإلكترونيات",
+            "research": "البحث العلمي"
+        }
+    }
 }

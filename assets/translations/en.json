@@ -136,5 +136,104 @@
   "no_departments": "No departments found",
   "no_courses": "No courses found",
   "lessons": "Lessons",
-  "error": "An error occurred"
+  "error": "An error occurred",
+  "admission": {
+    "title": "University Admission Portal",
+    "subtitle": "Everything you need before enrolling",
+    "coming_soon": "This section is under development",
+    "soon_badge": "Soon",
+    "loading": "Loading...",
+    "empty": "No data to display",
+    "error": "Something went wrong, please try again",
+    "retry": "Retry",
+    "modules": {
+      "guide": {
+        "title": "Colleges & Majors Guide",
+        "desc": "Explore each major, its subjects and careers"
+      },
+      "requirements": {
+        "title": "Admission Requirements",
+        "desc": "Certificates, GPAs and required documents"
+      },
+      "housing": {
+        "title": "Student Housing",
+        "desc": "Housing near campus with prices"
+      },
+      "exam_papers": {
+        "title": "Exam Papers",
+        "desc": "Past papers sorted by college"
+      },
+      "matcher": {
+        "title": "Major Matcher",
+        "desc": "Suggestions that fit your GPA and interests"
+      }
+    },
+    "certificate_type": {
+      "yemeni_general": "General Secondary",
+      "azhari": "Azhari Secondary",
+      "technical_diploma": "Technical Diploma",
+      "foreign_equivalent": "Equated Foreign Certificate"
+    },
+    "track": {
+      "scientific": "Scientific",
+      "literary": "Literary",
+      "commercial": "Commercial",
+      "technical": "Technical"
+    },
+    "gpa_scale": {
+      "percentage": "Percentage",
+      "gpa4": "Out of 4.0",
+      "gpa5": "Out of 5.0",
+      "grade": "Grade band"
+    },
+    "eligibility": {
+      "eligible": "Eligible",
+      "borderline": "Close to requirement",
+      "not_eligible": "Not eligible"
+    },
+    "reason": {
+      "certificate_type": "Certificate type is not accepted by this college",
+      "track": "Study track is not accepted by this college",
+      "gpa": "GPA is below the required minimum",
+      "certificate_age": "Certificate is older than the allowed period",
+      "equivalency": "Certificate requires ministry equivalency",
+      "subject_grade": "A required subject grade is below the minimum"
+    },
+    "housing_status": {
+      "available": "Available",
+      "full": "Full"
+    },
+    "housing_gender": {
+      "male": "Male students",
+      "female": "Female students",
+      "family": "Families"
+    },
+    "paper_type": {
+      "midterm": "Midterm",
+      "final": "Final",
+      "quiz": "Quiz",
+      "model": "Model"
+    },
+    "moderation": {
+      "published": "Published",
+      "pending": "Under review",
+      "rejected": "Rejected"
+    },
+    "interests": {
+      "math": "Mathematics",
+      "programming": "Programming",
+      "biology": "Biology",
+      "chemistry": "Chemistry",
+      "physics": "Physics",
+      "design": "Design",
+      "writing": "Writing",
+      "business": "Business",
+      "teaching": "Teaching",
+      "helping_people": "Helping people",
+      "law_justice": "Law & justice",
+      "languages": "Languages",
+      "electronics": "Electronics",
+      "research": "Research"
+    }
+  }
 }
