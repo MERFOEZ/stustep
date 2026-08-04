@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/theme/app_theme.dart';
+import '../admission/admission_hub_screen.dart';
 import 'service_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -132,6 +133,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     100,
                     'university_portal_desc',
+                    destinationBuilder: (_) => const AdmissionHubScreen(),
                   ),
                   _buildServiceCard(
                     context,
@@ -179,8 +181,9 @@ class HomeScreen extends StatelessWidget {
     IconData icon,
     Gradient gradient,
     int delay,
-    String descriptionKey,
-  ) {
+    String descriptionKey, {
+    WidgetBuilder? destinationBuilder,
+  }) {
     return ElasticIn(
       delay: Duration(milliseconds: delay),
       duration: const Duration(milliseconds: 1200),
@@ -207,12 +210,14 @@ class HomeScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ServiceDetailScreen(
-                    title: title,
-                    descriptionKey: descriptionKey,
-                    icon: icon,
-                    gradient: gradient,
-                  ),
+                  builder:
+                      destinationBuilder ??
+                      ((context) => ServiceDetailScreen(
+                        title: title,
+                        descriptionKey: descriptionKey,
+                        icon: icon,
+                        gradient: gradient,
+                      )),
                 ),
               );
             },
