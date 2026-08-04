@@ -146,6 +146,19 @@
     "empty": "No data to display",
     "error": "Something went wrong, please try again",
     "retry": "Retry",
+    "guide": {
+      "colleges_hint": "Pick a college to see its majors and their details",
+      "no_colleges": "No colleges have been added yet",
+      "no_departments": "This college has no majors yet",
+      "no_guide": "No guide has been added for this major yet",
+      "about": "About the major",
+      "core_subjects": "Core subjects",
+      "skills": "Skills you gain",
+      "careers": "Career paths",
+      "suits_you_if": "Suits you if you enjoy",
+      "study_years": "Study years",
+      "degree": "Degree awarded"
+    },
     "modules": {
       "guide": {
         "title": "Colleges & Majors Guide",

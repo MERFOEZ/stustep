@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'guide/guide_colleges_screen.dart';
+
 /// تعريف الأقسام الخمسة لموديول القبول.
 ///
 /// لماذا ملف تعريف مستقل بدل كتابة البطاقات داخل شاشة الـ Hub؟
@@ -29,6 +31,9 @@ class AdmissionModuleEntry {
   bool get isAvailable => builder != null;
 }
 
+/// بانِ شاشة كل قسم — دالة عليا مستقلة حتى تبقى القائمة `const`.
+Widget _guideBuilder(BuildContext context) => const GuideCollegesScreen();
+
 /// قائمة الأقسام بترتيب العرض في شاشة الـ Hub.
 class AdmissionModules {
   const AdmissionModules._();
@@ -41,7 +46,7 @@ class AdmissionModules {
       gradient: LinearGradient(
         colors: [Color(0xFF6200EE), Color(0xFF9C27B0)],
       ),
-      // يُربط في المرحلة 3.
+      builder: _guideBuilder,
     ),
     AdmissionModuleEntry(
       labelKey: 'admission.modules.requirements.title',
