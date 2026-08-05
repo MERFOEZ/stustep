@@ -159,6 +159,61 @@
       "study_years": "Study years",
       "degree": "Degree awarded"
     },
+    "reason_required": "Required",
+    "reason_actual": "Yours",
+    "certificate": {
+      "title": "High school certificate",
+      "subtitle": "Enter your data once and we will keep it on this device",
+      "type": "Certificate type",
+      "track": "Study track",
+      "scale": "Grading scale",
+      "gpa": "GPA",
+      "graduation_year": "Graduation year",
+      "has_equivalency": "I have a ministry equivalency",
+      "subject_grades": "Subject grades (optional)",
+      "subjects_hint": "Enter your grades as percentages. Some colleges require a minimum in specific subjects.",
+      "grade_hint": "Enter the band number: 1 excellent · 2 very good · 3 good · 4 pass",
+      "save": "Save and check eligibility",
+      "invalid_number": "Enter a valid number",
+      "invalid_percentage": "Percentage must be between 0 and 100",
+      "invalid_for_scale": "Value is outside the selected scale"
+    },
+    "subjects": {
+      "math": "Mathematics",
+      "physics": "Physics",
+      "chemistry": "Chemistry",
+      "biology": "Biology",
+      "english": "English",
+      "arabic": "Arabic"
+    },
+    "requirements": {
+      "hint": "Pick a college to see its full admission requirements",
+      "not_published": "Admission requirements for this college are not published yet",
+      "accepted_certificates": "Accepted certificates",
+      "allowed_tracks": "Allowed tracks",
+      "min_gpa": "Required GPA",
+      "general_min": "General minimum",
+      "max_age": "Max certificate age",
+      "years": "{} years",
+      "yes": "Required",
+      "equivalency_needed": "Ministry equivalency",
+      "subject_minimums": "Subject minimums",
+      "documents": "Required documents",
+      "entrance_exams": "Entrance exams",
+      "exam_required": "Required",
+      "exam_optional": "Optional",
+      "department_exceptions": "Department exceptions",
+      "exceptions_hint": "Some departments have requirements different from the college defaults",
+      "notes": "Notes",
+      "check_eligibility": "Am I eligible?"
+    },
+    "eligibility_result": {
+      "title": "Eligibility result",
+      "your_certificate": "Your certificate",
+      "college_level": "College level",
+      "department_level": "Department level",
+      "department_hint": "You may qualify for a department even if you miss the college defaults"
+    },
     "modules": {
       "guide": {
         "title": "Colleges & Majors Guide",
@@ -210,7 +265,8 @@
       "gpa": "GPA is below the required minimum",
       "certificate_age": "Certificate is older than the allowed period",
       "equivalency": "Certificate requires ministry equivalency",
-      "subject_grade": "A required subject grade is below the minimum"
+      "subject_grade": "A required subject grade is below the minimum",
+      "subject_missing": "A required subject grade was not entered"
     },
     "housing_status": {
       "available": "Available",
