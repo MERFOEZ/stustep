@@ -7,6 +7,7 @@ import '../models/admission_enums.dart';
 import '../models/housing_model.dart';
 import '../requirements/widgets/certificate_form_fields.dart';
 import '../widgets/admission_app_bar.dart';
+import '../widgets/admission_text_field.dart';
 import 'widgets/housing_form_controller.dart';
 import 'widgets/housing_form_fields.dart';
 
@@ -134,26 +135,26 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
 
   List<Widget> _buildTextFields() {
     return [
-      HousingTextField(
+      AdmissionTextField(
         controller: _form.name,
         label: 'admission.housing.name'.tr(),
         icon: Icons.home_rounded,
         validator: _required,
       ),
-      HousingTextField(
+      AdmissionTextField(
         controller: _form.phone,
         label: 'admission.housing.phone'.tr(),
         icon: Icons.call_rounded,
         keyboardType: TextInputType.phone,
         validator: _required,
       ),
-      HousingTextField(
+      AdmissionTextField(
         controller: _form.whatsapp,
         label: 'admission.housing.whatsapp_optional'.tr(),
         icon: Icons.chat_rounded,
         keyboardType: TextInputType.phone,
       ),
-      HousingTextField(
+      AdmissionTextField(
         controller: _form.address,
         label: 'admission.housing.address'.tr(),
         icon: Icons.place_rounded,
@@ -170,7 +171,7 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
       Row(
         children: [
           Expanded(
-            child: HousingTextField(
+            child: AdmissionTextField(
               controller: _form.distance,
               label: 'admission.housing.distance_km'.tr(),
               icon: Icons.directions_walk_rounded,
@@ -179,7 +180,7 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: HousingTextField(
+            child: AdmissionTextField(
               controller: _form.price,
               label: 'admission.housing.price_optional'.tr(),
               icon: Icons.payments_rounded,
@@ -188,13 +189,13 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
           ),
         ],
       ),
-      HousingTextField(
+      AdmissionTextField(
         controller: _form.rooms,
         label: 'admission.housing.rooms_optional'.tr(),
         icon: Icons.meeting_room_rounded,
         keyboardType: TextInputType.number,
       ),
-      HousingTextField(
+      AdmissionTextField(
         controller: _form.description,
         label: 'admission.housing.description'.tr(),
         icon: Icons.notes_rounded,
