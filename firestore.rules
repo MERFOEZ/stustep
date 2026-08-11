@@ -160,42 +160,57 @@ service cloud.firestore {
     // فيها المجموعة مفتوحة للكتابة من أي أحد. القاعدة الجاهزة مسبقاً تجعل
     // أول كتابة في هذه المجموعات محكومة من لحظتها الأولى.
 
+    // سياسة المراجعة الحالية: **النشر الفوري مع مراجعة لاحقة.**
+    //
+    // القيمة الافتراضية لحقل `moderationStatus` في النموذجين هي `published`،
+    // ولا توجد بعد لوحة مشرف تعتمد المحتوى. اشتراط `pending` عند الإنشاء
+    // كان سيجعل كل إعلان يضيفه طالب غير مرئي لأحد إلى الأبد.
+    //
+    // ما تحرسه القاعدة فعلياً: **لا يستطيع المستخدم تغيير حالة المراجعة بعد
+    // الإنشاء.** أي أن قرار المشرف بالرفض يثبت ولا يُلغيه صاحب المحتوى.
+    // وعند بناء لوحة المشرف يكفي تغيير `!= 'rejected'` إلى `== 'pending'`
+    // في سطر الإنشاء للانتقال إلى مراجعة مسبقة، بلا أي تغيير في التطبيق.
+
+    function ownsHousing() {
+      return isSignedIn() && resource.data.createdBy == request.auth.uid;
+    }
+
     match /housings/{housingId} {
       allow read: if isSignedIn();
 
-      // المُنشئ يكتب باسمه فقط، ولا يستطيع نشر إعلانه معتمَداً بنفسه:
-      // حقل `moderationStatus` يجب أن يبدأ `pending` ولا يغيّره إلا المشرف.
+      // المُنشئ يكتب باسمه فقط، ولا يستطيع إنشاء محتوى بحالة «مرفوض».
       allow create: if isSignedIn()
-        && request.resource.data.ownerId == request.auth.uid
-        && request.resource.data.moderationStatus == 'pending';
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.moderationStatus != 'rejected';
 
+      // المالك يعدّل بيانات إعلانه، لكن لا يمسّ هويته ولا حالة مراجعته.
       allow update: if isAdmin()
-        || (isSignedIn()
-            && resource.data.ownerId == request.auth.uid
-            && request.resource.data.ownerId == resource.data.ownerId
+        || (ownsHousing()
+            && request.resource.data.createdBy == resource.data.createdBy
             && request.resource.data.moderationStatus
                == resource.data.moderationStatus);
 
-      allow delete: if isAdmin()
-        || (isSignedIn() && resource.data.ownerId == request.auth.uid);
+      allow delete: if isAdmin() || ownsHousing();
+    }
+
+    function ownsPaper() {
+      return isSignedIn() && resource.data.uploadedBy == request.auth.uid;
     }
 
     match /exam_papers/{paperId} {
       allow read: if isSignedIn();
 
       allow create: if isSignedIn()
-        && request.resource.data.uploaderId == request.auth.uid
-        && request.resource.data.moderationStatus == 'pending';
+        && request.resource.data.uploadedBy == request.auth.uid
+        && request.resource.data.moderationStatus != 'rejected';
 
       allow update: if isAdmin()
-        || (isSignedIn()
-            && resource.data.uploaderId == request.auth.uid
-            && request.resource.data.uploaderId == resource.data.uploaderId
+        || (ownsPaper()
+            && request.resource.data.uploadedBy == resource.data.uploadedBy
             && request.resource.data.moderationStatus
                == resource.data.moderationStatus);
 
-      allow delete: if isAdmin()
-        || (isSignedIn() && resource.data.uploaderId == request.auth.uid);
+      allow delete: if isAdmin() || ownsPaper();
     }
 
     // ======================= 6. المشرفون =======================
