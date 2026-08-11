@@ -1,8 +1,15 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 // حقول نموذج إدخال الشهادة، مفصولة عن الشاشة لإبقائها تحت السقف المتفق
 // عليه ولإعادة استخدامها في مساعد اختيار التخصص في المرحلة 7.
+//
+// ⚠️ ملاحظة مهمة: نستورد `dart:ui` باسم مستعار `ui` ونكتب `ui.TextDirection`
+// صراحةً. السبب أن حزمة easy_localization تصدّر تعداداً آخر بنفس الاسم
+// (`TextDirection` من حزمة intl) وقيمه `LTR` و`RTL` بحروف كبيرة، فيتعارض
+// الاسمان ويفشل البناء عند كتابة `TextDirection.ltr` مجرّدة.
 
 /// عنوان حقل داخل النموذج.
 class FormFieldLabel extends StatelessWidget {
@@ -126,7 +133,7 @@ class GpaNumberField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      textDirection: TextDirection.ltr,
+      textDirection: ui.TextDirection.ltr,
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
@@ -183,7 +190,7 @@ class GraduationYearField extends StatelessWidget {
           .map(
             (year) => DropdownMenuItem<int>(
               value: year,
-              child: Text('$year', textDirection: TextDirection.ltr),
+              child: Text('$year', textDirection: ui.TextDirection.ltr),
             ),
           )
           .toList(),
