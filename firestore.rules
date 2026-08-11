@@ -1,0 +1,222 @@
+rules_version = '2';
+
+// ============================================================================
+// قواعد أمان Firestore لمشروع StuStep
+// ============================================================================
+//
+// ⚠️ خلفية إلزامية قبل قراءة هذا الملف:
+//
+// المشروع لم يكن يحوي أي ملف قواعد إطلاقاً، أي أن قاعدة البيانات كانت على
+// الأرجح في وضع الاختبار المفتوح — يقرأ منها ويكتب فيها أي شخص يملك مفاتيح
+// التطبيق العامة، وهي مضمّنة في أي نسخة منشورة.
+//
+// الخطر الذي أخّر هذه المرحلة: نشر قواعد تغطي **المجموعات الجديدة فقط**
+// يُغلق تلقائياً كل المجموعات القائمة (الشات، الكليات، المواد، المستخدمين)
+// لأن القاعدة الافتراضية في Firestore هي المنع. النتيجة كانت ستكون تعطّل
+// التطبيق بالكامل عند كل المستخدمين فور النشر.
+//
+// الاستراتيجية المعتمدة — **القفل التدريجي**:
+//   الطبقة الأولى: تغطية صريحة لكل مجموعة قائمة بأخف قيد يبقيها تعمل،
+//                  وهو اشتراط تسجيل الدخول. لا شاشة في التطبيق تقرأ من
+//                  Firestore قبل المصادقة، فهذا القيد آمن ومُتحقَّق منه.
+//   الطبقة الثانية: قيود صارمة على المجموعات الجديدة: قراءة للجميع
+//                  المسجَّلين، وكتابة للمشرف وحده.
+//   الطبقة الثالثة: ملكية صريحة للمحتوى الذي يضيفه المستخدمون.
+//
+// 🔴 قبل النشر إلى الإنتاج:
+//   1. `firebase emulators:start --only firestore` وتجربة التطبيق كاملاً.
+//   2. إنشاء وثيقة في `admins/{uid}` لحساب المشرف يدوياً من Console.
+//   3. `firebase deploy --only firestore:rules`
+//   ملاحظة: الكتابة من Firebase Console تتجاوز هذه القواعد دائماً، فإدخال
+//   البيانات الأكاديمية يدوياً يبقى ممكناً كما هو.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ======================= دوال مساعدة =======================
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // الصلاحية الإدارية = **وجود وثيقة** باسم المستخدم في `admins`.
+    //
+    // اخترنا هذا بدل حقل `role` داخل `users` لسببين: تفادي تعديل
+    // `auth_service.dart` وهو ملف محظور، وتفادي ترحيل بيانات المستخدمين
+    // الحاليين. الوثيقة تُنشأ يدوياً من Console ولا يستطيع أي عميل إنشاءها.
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // هل الحقول المرسلة في الكتابة محصورة في قائمة مسموحة؟
+    function onlyFields(allowed) {
+      return request.resource.data.keys().hasOnly(allowed);
+    }
+
+    // ======================= 1. المستخدمون =======================
+
+    match /users/{userId} {
+      // القراءة لكل مسجَّل: أسماء المستخدمين تظهر في الشات.
+      allow read: if isSignedIn();
+
+      // المستخدم يُنشئ وثيقته ويحدّثها وحده. لا حذف من العميل إطلاقاً.
+      allow create: if isOwner(userId)
+        && onlyFields(['uid', 'name', 'email', 'createdAt', 'photoUrl']);
+      allow update: if isOwner(userId)
+        && onlyFields(['uid', 'name', 'email', 'createdAt', 'photoUrl']);
+      allow delete: if false;
+
+      // نتائج مساعد اختيار التخصص — خاصة بصاحبها وحده.
+      // ملاحظة: هذه المجموعة الفرعية لا تمسّ وثيقة المستخدم نفسها إطلاقاً،
+      // وهو ما سمح ببنائها دون الاقتراب من خدمة المصادقة.
+      match /matcher_results/{resultId} {
+        allow read, create, delete: if isOwner(userId);
+        allow update: if false; // النتيجة سجل تاريخي لا يُحرَّر
+      }
+    }
+
+    // ======================= 2. الشجرة الأكاديمية =======================
+    //
+    // مجموعات يملكها زملاء في الفريق ويُدخلونها يدوياً من Console.
+    // موديول القبول يقرأ منها **ولا يكتب فيها إطلاقاً**، ولذلك الكتابة
+    // محصورة بالمشرف: هذا يمنع أي عميل من تخريب بيانات الجامعة.
+
+    match /colleges/{collegeId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /departments/{departmentId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /courses/{courseId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ======================= 3. الشات =======================
+
+    match /groups/{groupId} {
+      allow read: if isSignedIn();
+
+      // الإنشاء والتحديث لأي مسجَّل: التطبيق يُنشئ المجموعات الافتراضية
+      // عند الإقلاع، ويضيف العضو نفسه إلى `members` عند فتح المجموعة،
+      // ويحدّث `lastMessage` مع كل رسالة.
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+
+        // المرسِل هو من يكتب باسمه فقط — لا انتحال هوية.
+        allow create: if isSignedIn()
+          && request.resource.data.senderId == request.auth.uid;
+
+        // التحديث للمرسِل وحده: التطبيق يحدّث حالة رفع المرفق بعد الإرسال.
+        allow update: if isSignedIn()
+          && resource.data.senderId == request.auth.uid;
+
+        // 🔒 إصلاح ثغرة حقيقية: دالة حذف الرسالة في التطبيق لا تتحقق من
+        // الملكية إطلاقاً، والتحقق الوحيد الموجود في الواجهة فقط (`isMe`).
+        // أي شخص يستدعي الـ SDK مباشرة كان يستطيع حذف رسائل الآخرين.
+        // هذه القاعدة تسدّ الثغرة من طرف الخادم دون تعديل ملف الشات.
+        allow delete: if isSignedIn()
+          && (resource.data.senderId == request.auth.uid || isAdmin());
+      }
+    }
+
+    // ======================= 4. مجموعات موديول القبول =======================
+    //
+    // بيانات مرجعية رسمية: يقرأها الجميع ولا يكتبها إلا المشرف.
+    // معرّف الوثيقة في كلتيهما مطابق لمعرّف الأصل (علاقة 1:1).
+
+    match /department_guides/{departmentId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /admission_requirements/{collegeId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /app_config/{configId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ======================= 5. محتوى يضيفه المستخدمون =======================
+    //
+    // المرحلتان 5 و6 (السكنات ونماذج الاختبارات) لم تُنفَّذا بعد، لكن قواعدهما
+    // تُنشر الآن عمداً. السبب: نشر القواعد بعد إطلاق الميزة يعني فترة تكون
+    // فيها المجموعة مفتوحة للكتابة من أي أحد. القاعدة الجاهزة مسبقاً تجعل
+    // أول كتابة في هذه المجموعات محكومة من لحظتها الأولى.
+
+    match /housings/{housingId} {
+      allow read: if isSignedIn();
+
+      // المُنشئ يكتب باسمه فقط، ولا يستطيع نشر إعلانه معتمَداً بنفسه:
+      // حقل `moderationStatus` يجب أن يبدأ `pending` ولا يغيّره إلا المشرف.
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.moderationStatus == 'pending';
+
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && resource.data.ownerId == request.auth.uid
+            && request.resource.data.ownerId == resource.data.ownerId
+            && request.resource.data.moderationStatus
+               == resource.data.moderationStatus);
+
+      allow delete: if isAdmin()
+        || (isSignedIn() && resource.data.ownerId == request.auth.uid);
+    }
+
+    match /exam_papers/{paperId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && request.resource.data.uploaderId == request.auth.uid
+        && request.resource.data.moderationStatus == 'pending';
+
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && resource.data.uploaderId == request.auth.uid
+            && request.resource.data.uploaderId == resource.data.uploaderId
+            && request.resource.data.moderationStatus
+               == resource.data.moderationStatus);
+
+      allow delete: if isAdmin()
+        || (isSignedIn() && resource.data.uploaderId == request.auth.uid);
+    }
+
+    // ======================= 6. المشرفون =======================
+    //
+    // وثيقة المشرف تُنشأ يدوياً من Firebase Console فقط.
+    // المستخدم يقرأ وثيقته وحدها ليعرف هل هو مشرف، ولا يقرأ قائمة المشرفين
+    // كاملة، ولا يكتب فيها إطلاقاً — وإلا لَمنح كل مستخدم نفسه الصلاحية.
+
+    match /admins/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    // ======================= 7. المنع الافتراضي =======================
+    //
+    // أي مجموعة غير مذكورة أعلاه ممنوعة تماماً. وجود هذه القاعدة صريحةً
+    // ليس ضرورياً تقنياً (المنع هو الأصل) لكنه توثيق مقصود: من يضيف مجموعة
+    // جديدة يجب أن يضيف قاعدتها هنا وإلا فشلت كتابته فوراً وانتبه للأمر.
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
