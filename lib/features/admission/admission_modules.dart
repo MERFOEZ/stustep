@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'guide/guide_colleges_screen.dart';
+import 'matcher/matcher_intro_screen.dart';
 import 'requirements/requirements_colleges_screen.dart';
 
 /// تعريف الأقسام الخمسة لموديول القبول.
@@ -37,6 +38,8 @@ Widget _guideBuilder(BuildContext context) => const GuideCollegesScreen();
 
 Widget _requirementsBuilder(BuildContext context) =>
     const RequirementsCollegesScreen();
+
+Widget _matcherBuilder(BuildContext context) => const MatcherIntroScreen();
 
 /// قائمة الأقسام بترتيب العرض في شاشة الـ Hub.
 class AdmissionModules {
@@ -86,7 +89,7 @@ class AdmissionModules {
       gradient: LinearGradient(
         colors: [Color(0xFFC51162), Color(0xFFFF4081)],
       ),
-      // يُربط في المرحلة 7.
+      builder: _matcherBuilder,
     ),
   ];
 }
