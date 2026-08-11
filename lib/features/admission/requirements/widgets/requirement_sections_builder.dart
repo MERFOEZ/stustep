@@ -1,13 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/services/academic_guide_service.dart';
-import '../guide/widgets/guide_list_views.dart';
-import '../guide/widgets/guide_section_card.dart';
-import '../models/admission_enums.dart';
-import '../models/admission_requirement_model.dart';
-import '../models/department_summary.dart';
-import 'widgets/requirement_views.dart';
+import '../../../../core/services/academic_guide_service.dart';
+import '../../guide/widgets/guide_list_views.dart';
+import '../../guide/widgets/guide_section_card.dart';
+import '../../models/admission_enums.dart';
+import '../../models/admission_requirement_model.dart';
+import '../../models/department_summary.dart';
+import 'requirement_views.dart';
 
 /// بانِي أقسام شاشة شروط القبول.
 ///
