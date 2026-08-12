@@ -6,6 +6,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import '../../core/services/video_download_service.dart';
 import '../../core/services/video_encryption_service.dart';
+import '../../core/services/gamification_event_bus.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String courseId;
@@ -147,7 +148,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     final videoUrl = lesson['url']?.toString() ?? '';
     final videoId = _getVideoId(index);
 
-    print('=== VIDEO_URL_DEBUG: $videoUrl ===');
+    debugPrint('=== VIDEO_URL_DEBUG: $videoUrl ===');
 
     if (videoUrl.isEmpty || !videoUrl.startsWith('http')) {
       if (mounted) {
@@ -179,6 +180,15 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       await _videoPlayerController!.initialize();
 
       if (mounted) {
+        GamificationEventBus.record(
+          GamificationAction.completeLesson,
+          context: context,
+          showCelebration: true,
+          celebrationTitle: 'quests.daily_lesson_title',
+          referenceId: videoId,
+          metadata: {'courseId': widget.courseId, 'lessonIndex': index},
+        );
+
         setState(() {
           _chewieController = ChewieController(
             videoPlayerController: _videoPlayerController!,
@@ -202,7 +212,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         });
       }
     } catch (e) {
-      print('=== VIDEO_INIT_ERROR: $e ===');
+      debugPrint('=== VIDEO_INIT_ERROR: $e ===');
       debugPrint("Error initializing video: $e");
     }
   }
@@ -225,7 +235,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     final downloadTitle = lesson['title']?.toString() ?? lesson['name']?.toString() ?? '';
     final videoId = _getVideoId(index);
 
-    print('=== START DOWNLOADING: $downloadUrl ===');
+    debugPrint('=== START DOWNLOADING: $downloadUrl ===');
 
     if (downloadUrl.isEmpty) {
       _showCinematicSnackBar('رابط الفيديو غير متوفر للتحميل', isError: true);
@@ -264,7 +274,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         _showCinematicSnackBar('تم تحميل الدرس بنجاح ✨');
       }
     } catch (e) {
-      print('=== DOWNLOAD ERROR: $e ===');
+      debugPrint('=== DOWNLOAD ERROR: $e ===');
       if (mounted) {
         setState(() {
           _downloadStatus[videoId] = 'not_downloaded';

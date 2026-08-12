@@ -7,7 +7,15 @@ import 'firebase_options.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/splash_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'features/points/services/points_service.dart';
+import 'features/points/providers/points_provider.dart';
+import 'features/leaderboard/services/leaderboard_service.dart';
+import 'features/leaderboard/providers/leaderboard_provider.dart';
+import 'features/referral/services/referral_service.dart';
+import 'features/referral/providers/referral_provider.dart';
+import 'features/quests/services/quests_service.dart';
+import 'features/quests/providers/quests_provider.dart';
+import 'core/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +31,12 @@ void main() async {
     ); // Fallback for Windows if documents directory is unavailable
   }
 
+  // Initialize Hive boxes for offline caching
+  await PointsService.initHive();
+  await LeaderboardService.initHive();
+  await ReferralService.initHive();
+  await QuestsService.initHive();
+
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],
@@ -30,7 +44,13 @@ void main() async {
       fallbackLocale: const Locale('ar'),
       startLocale: const Locale('ar'),
       child: MultiProvider(
-        providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider(create: (_) => PointsProvider()),
+          ChangeNotifierProvider(create: (_) => LeaderboardProvider()),
+          ChangeNotifierProvider(create: (_) => ReferralProvider()),
+          ChangeNotifierProvider(create: (_) => QuestsProvider()),
+        ],
         child: const StuStepApp(),
       ),
     ),
@@ -43,7 +63,7 @@ class StuStepApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'app_name'.tr(),
+      onGenerateTitle: (context) => 'app_name'.tr(),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
@@ -51,6 +71,7 @@ class StuStepApp extends StatelessWidget {
       theme: AppTheme.lightTheme(context),
       darkTheme: AppTheme.darkTheme(context),
       themeMode: context.watch<ThemeProvider>().themeMode,
+      routes: AppRoutes.routes,
       home: const SplashScreen(),
     );
   }

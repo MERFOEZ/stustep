@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 1. Users collection
+    // Clients may read profiles, but CANNOT modify sensitive gamification or referral fields directly.
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) 
+        && (!request.resource.data.keys().hasAny(['totalPoints', 'weeklyPoints', 'currentStreak', 'tierLevel', 'leaderboardGroupId', 'referralCode', 'referredBy']));
+      allow update: if isOwner(userId)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['totalPoints', 'weeklyPoints', 'currentStreak', 'tierLevel', 'leaderboardGroupId', 'referralCode', 'referredBy']));
+      allow delete: if false;
+    }
+
+    // 2. Points Transactions: Full audit trail - writeable ONLY by Cloud Functions (Admin SDK)
+    match /pointsTransactions/{transactionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // 3. Quests Templates: Daily & Weekly definitions (Read-only for clients)
+    match /dailyQuests/{questId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    match /weeklyQuests/{questId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // 4. Quest Progress: User-specific progress (Read-only for the user, mutated via Cloud Functions)
+    match /userDailyQuestProgress/{progressId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    match /userWeeklyQuestProgress/{progressId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // 5. Leaderboard Groups: Read-only for authenticated users, managed by Cloud Functions
+    match /leaderboardGroups/{groupId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+
+      match /members/{memberId} {
+        allow read: if isAuthenticated();
+        allow write: if false;
+      }
+    }
+
+    // 6. Referral Records: Read-only for the parties involved, writeable ONLY by Cloud Functions
+    match /referrals/{referralId} {
+      allow read: if isAuthenticated() && (resource.data.referrerId == request.auth.uid || resource.data.referredId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // 7. Suspicious Referral Logs (Admin/Internal only)
+    match /suspiciousReferrals/{logId} {
+      allow read, write: if false;
+    }
+
+    // 8. Community Chat & Groups
+    match /chatGroups/{groupId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+        allow update, delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
+      }
+    }
+
+    // 9. Academic Content (Courses, Colleges, Departments, Admission, Past Papers)
+    match /colleges/{collegeId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    match /departments/{deptId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    match /courses/{courseId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    match /examPapers/{paperId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    match /admissionRequirements/{reqId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    match /housing/{housingId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+  }
+}

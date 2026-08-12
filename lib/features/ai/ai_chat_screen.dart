@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../core/services/ai_service.dart';
+import '../../core/services/gamification_event_bus.dart';
 import 'package:animate_do/animate_do.dart';
 
 class AIChatScreen extends StatefulWidget {
@@ -92,6 +93,13 @@ class _AIChatScreenState extends State<AIChatScreen>
           _messages.add({'role': 'assistant', 'content': response});
         });
         _scrollToBottom();
+        GamificationEventBus.record(
+          GamificationAction.aiChatSession,
+          context: context,
+          showCelebration: true,
+          celebrationTitle: 'quests.daily_ai_title',
+          metadata: {'model': _selectedModel.name, 'messageLength': text.length},
+        );
       }
     } catch (e) {
       if (mounted) {

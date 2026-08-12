@@ -449,8 +449,9 @@ class _CourseDownloadsScreenState extends State<CourseDownloadsScreen>
               });
               await VideoDownloadService.deleteDownload(videoId);
               _refreshSize();
-              if (_videos.isEmpty && mounted) {
-                Navigator.pop(context);
+              if (!context.mounted) return;
+              if (_videos.isEmpty) {
+                Navigator.of(context).pop();
               }
             },
             background: Container(

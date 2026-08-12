@@ -4,6 +4,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/referral_link_service.dart';
+import '../referral/services/referral_service.dart';
 import '../../shared/widgets/main_scaffold.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -18,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _referralController = TextEditingController();
   final _authService = AuthService();
 
   bool _isLoading = false;
@@ -25,10 +28,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    ReferralLinkService.getPendingReferralCode().then((code) {
+      if (code != null && code.isNotEmpty && mounted) {
+        setState(() {
+          _referralController.text = code;
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _referralController.dispose();
     super.dispose();
   }
 
@@ -47,8 +63,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: _passwordController.text,
       );
 
+      // Apply referral code if present
+      final refCode = _referralController.text.trim();
+      if (refCode.isNotEmpty) {
+        try {
+          await ReferralService().applyReferralCode(referralCode: refCode);
+          await ReferralLinkService.clearPendingReferralCode();
+        } catch (_) {}
+      }
+
       if (mounted) {
-        // Redirect to MainScaffold and clear all navigation history to prevent going back to auth screens
+        // Redirect to MainScaffold and clear all navigation history
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const MainScaffold()),
@@ -322,6 +347,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               }
                               return null;
                             },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Optional Referral Code Field
+                          Text(
+                            'referral.code_optional'.tr(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: textColor.withValues(alpha: 0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _referralController,
+                            textCapitalization: TextCapitalization.characters,
+                            textInputAction: TextInputAction.done,
+                            style: TextStyle(color: textColor, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                            decoration: InputDecoration(
+                              hintText: 'referral.code_placeholder'.tr(),
+                              hintStyle: TextStyle(color: textColor.withValues(alpha: 0.4), letterSpacing: 0),
+                              filled: true,
+                              fillColor: inputColor,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              prefixIcon: const Icon(Icons.card_giftcard_rounded, color: primaryBlue),
+                            ),
                             onFieldSubmitted: (_) => _handleRegister(),
                           ),
                           const SizedBox(height: 24),

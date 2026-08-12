@@ -6,6 +6,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../core/services/chat_service.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/gamification_event_bus.dart';
 import 'models/message_model.dart';
 import 'models/group_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -102,6 +103,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         repliedToSender: repliedSender,
       );
       _scrollToBottom();
+      if (mounted) {
+        GamificationEventBus.record(
+          GamificationAction.communityInteraction,
+          context: context,
+          showCelebration: true,
+          celebrationTitle: 'quests.daily_community_title',
+          referenceId: widget.group.id,
+          metadata: {'groupId': widget.group.id},
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

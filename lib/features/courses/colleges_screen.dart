@@ -73,7 +73,7 @@ class _CollegesScreenState extends State<CollegesScreen> {
               FirebaseFirestore.instance.collection('colleges').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              print('=== APP_STATE: Loading... ===');
+              debugPrint('=== APP_STATE: Loading... ===');
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -100,7 +100,7 @@ class _CollegesScreenState extends State<CollegesScreen> {
             }
 
             if (snapshot.hasError) {
-              print('=== APP_ERROR: ${snapshot.error} ===');
+              debugPrint('=== APP_ERROR: ${snapshot.error} ===');
               return Center(
                 child: FadeIn(
                   child: Column(
@@ -108,31 +108,26 @@ class _CollegesScreenState extends State<CollegesScreen> {
                     children: [
                       Icon(
                         Icons.error_outline_rounded,
-                        size: 72,
-                        color: Colors.red.shade300,
+                        size: 48,
+                        color: Colors.red.shade400,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'error'.tr(),
+                        'حدث خطأ في تحميل الكليات',
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {});
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('إعادة المحاولة'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${snapshot.error}',
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 12,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -141,7 +136,7 @@ class _CollegesScreenState extends State<CollegesScreen> {
             }
 
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              print('=== APP_STATE: No Data or Empty ===');
+              debugPrint('=== APP_STATE: No Data or Empty ===');
               return Center(
                 child: FadeIn(
                   child: Column(
@@ -168,7 +163,7 @@ class _CollegesScreenState extends State<CollegesScreen> {
             }
 
             final docs = snapshot.data!.docs;
-            print('=== APP_SUCCESS: Found ${docs.length} colleges ===');
+            debugPrint('=== APP_SUCCESS: Found ${docs.length} colleges ===');
 
             return CustomScrollView(
               slivers: [
@@ -214,11 +209,11 @@ class _CollegesScreenState extends State<CollegesScreen> {
                         String? iconName;
                         try {
                           final data = doc.data() as Map<String, dynamic>? ?? {};
-                          print('--- Mapping doc ${doc.id}: $data ---');
+                          debugPrint('--- Mapping doc ${doc.id}: $data ---');
                           name = data['name'] as String? ?? '';
                           iconName = data['icon'] as String?;
                         } catch (e) {
-                          print('=== APP_MAPPING_ERROR: Failed to map doc ${doc.id}: $e ===');
+                          debugPrint('=== APP_MAPPING_ERROR: Failed to map doc ${doc.id}: $e ===');
                         }
                         final gradient =
                             _gradients[index % _gradients.length];

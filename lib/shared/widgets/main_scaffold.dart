@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/gamification_event_bus.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/ai/ai_chat_screen.dart';
@@ -10,6 +12,10 @@ import '../../features/courses/colleges_screen.dart';
 import '../../features/chat/chat_groups_screen.dart';
 import '../../features/downloads/downloads_screen.dart';
 import '../../features/settings/settings_screen.dart';
+import '../../features/points/providers/points_provider.dart';
+import '../../features/points/screens/points_hub_screen.dart';
+import '../../features/leaderboard/screens/leaderboard_screen.dart';
+import '../../features/referral/screens/referral_screen.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
@@ -41,6 +47,12 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   Future<void> _loadUserData() async {
     final currentUser = _authService.currentUser;
+    // Record daily login & check streak
+    GamificationEventBus.record(
+      GamificationAction.dailyLogin,
+      referenceId: currentUser?.uid,
+    );
+
     if (currentUser != null) {
       setState(() {
         _userEmail = currentUser.email ?? '';
@@ -66,6 +78,8 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final pointsProvider = context.watch<PointsProvider>();
+
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
@@ -81,7 +95,56 @@ class _MainScaffoldState extends State<MainScaffold> {
             color: Colors.white,
           ),
         ),
-        actions: const [],
+        actions: [
+          // Points Counter Badge in AppBar
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PointsHubScreen()),
+              );
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.monetization_on_rounded,
+                    color: Color(0xFFFFD700),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${pointsProvider.totalPoints}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.leaderboard_rounded),
+            tooltip: 'leaderboard.title'.tr(),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
+              );
+            },
+          ),
+        ],
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: Drawer(
@@ -107,6 +170,13 @@ class _MainScaffoldState extends State<MainScaffold> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            }),
+            _buildDrawerItem(Icons.card_giftcard_rounded, 'referral.title'.tr(), () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ReferralScreen()),
               );
             }),
             _buildDrawerItem(Icons.calculate, 'academic_tools'.tr(), () {}),

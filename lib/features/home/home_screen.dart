@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
-import '../../core/theme/app_theme.dart';
 import '../admission/admission_hub_screen.dart';
+import '../quests/screens/quests_screen.dart';
+import '../leaderboard/screens/leaderboard_screen.dart';
 import 'service_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -18,53 +19,43 @@ class HomeScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Theme.of(context).scaffoldBackgroundColor,
-              Theme.of(context).primaryColor.withValues(alpha: 0.05),
+              Theme.of(context).cardColor.withValues(alpha: 0.8),
             ],
           ),
         ),
         child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FadeInLeft(
-                      duration: const Duration(milliseconds: 800),
-                      child: ShaderMask(
-                        shaderCallback: (bounds) => AppTheme.primaryGradient(
-                          context,
-                        ).createShader(bounds),
-                        child: Text(
-                          'home'.tr(),
-                          style: Theme.of(context).textTheme.displayMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    offset: const Offset(2, 2),
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
+                      duration: const Duration(milliseconds: 600),
+                      child: const Text(
+                        'StuStep',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    FadeInRight(
+                    const SizedBox(height: 16),
+                    FadeInUp(
                       duration: const Duration(milliseconds: 800),
-                      delay: const Duration(milliseconds: 200),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
+                          horizontal: 16,
+                          vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          gradient: AppTheme.accentGradient(context),
-                          borderRadius: BorderRadius.circular(30),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFE91E63), Color(0xFFFF5252)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
                               color: const Color(
@@ -116,12 +107,34 @@ class HomeScreen extends StatelessWidget {
                 delegate: SliverChildListDelegate([
                   _buildServiceCard(
                     context,
+                    'quests.title'.tr(),
+                    Icons.task_alt_rounded,
+                    const LinearGradient(
+                      colors: [Color(0xFF6200EE), Color(0xFF7C4DFF)],
+                    ),
+                    0,
+                    'quests.subtitle',
+                    destinationBuilder: (_) => const QuestsScreen(),
+                  ),
+                  _buildServiceCard(
+                    context,
+                    'leaderboard.title'.tr(),
+                    Icons.leaderboard_rounded,
+                    const LinearGradient(
+                      colors: [Color(0xFFFF9100), Color(0xFFFFD700)],
+                    ),
+                    50,
+                    'leaderboard.group_label',
+                    destinationBuilder: (_) => const LeaderboardScreen(),
+                  ),
+                  _buildServiceCard(
+                    context,
                     'major_matcher'.tr(),
                     Icons.psychology,
                     const LinearGradient(
                       colors: [Color(0xFF6200EE), Color(0xFF9C27B0)],
                     ),
-                    0,
+                    100,
                     'major_matcher_desc',
                   ),
                   _buildServiceCard(
@@ -131,7 +144,7 @@ class HomeScreen extends StatelessWidget {
                     const LinearGradient(
                       colors: [Color(0xFF00C853), Color(0xFF00E676)],
                     ),
-                    100,
+                    150,
                     'university_portal_desc',
                     destinationBuilder: (_) => const AdmissionHubScreen(),
                   ),
@@ -152,7 +165,7 @@ class HomeScreen extends StatelessWidget {
                     const LinearGradient(
                       colors: [Color(0xFFD500F9), Color(0xFFE040FB)],
                     ),
-                    300,
+                    250,
                     'marketplace_desc',
                   ),
                   _buildServiceCard(
@@ -162,7 +175,7 @@ class HomeScreen extends StatelessWidget {
                     const LinearGradient(
                       colors: [Color(0xFFFF1744), Color(0xFFFF5252)],
                     ),
-                    400,
+                    300,
                     'scholarship_radar_desc',
                   ),
                 ]),

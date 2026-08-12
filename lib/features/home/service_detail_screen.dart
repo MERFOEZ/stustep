@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
+import '../../core/services/gamification_event_bus.dart';
 
-class ServiceDetailScreen extends StatelessWidget {
+class ServiceDetailScreen extends StatefulWidget {
   final String title;
   final String descriptionKey;
   final IconData icon;
@@ -15,6 +16,23 @@ class ServiceDetailScreen extends StatelessWidget {
     required this.icon,
     required this.gradient,
   });
+
+  @override
+  State<ServiceDetailScreen> createState() => _ServiceDetailScreenState();
+}
+
+class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      GamificationEventBus.record(
+        GamificationAction.useSection,
+        referenceId: widget.title,
+        metadata: {'sectionTitle': widget.title},
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +79,7 @@ class ServiceDetailScreen extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        descriptionKey.tr(),
+                        widget.descriptionKey.tr(),
                         style: TextStyle(
                           fontSize: 16,
                           height: 1.6,
@@ -91,7 +109,7 @@ class ServiceDetailScreen extends StatelessWidget {
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: BoxDecoration(gradient: gradient),
+          decoration: BoxDecoration(gradient: widget.gradient),
           child: Stack(
             children: [
               PositionedDirectional(
@@ -99,7 +117,7 @@ class ServiceDetailScreen extends StatelessWidget {
                 bottom: -30,
                 child: Opacity(
                   opacity: 0.2,
-                  child: Icon(icon, size: 180, color: Colors.white),
+                  child: Icon(widget.icon, size: 180, color: Colors.white),
                 ),
               ),
               Center(
@@ -108,12 +126,12 @@ class ServiceDetailScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 30),
                     Hero(
-                      tag: title,
-                      child: Icon(icon, size: 60, color: Colors.white),
+                      tag: widget.title,
+                      child: Icon(widget.icon, size: 60, color: Colors.white),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      title,
+                      widget.title,
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
