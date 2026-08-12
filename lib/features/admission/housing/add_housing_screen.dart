@@ -10,12 +10,13 @@ import '../models/admission_enums.dart';
 import '../models/housing_model.dart';
 import '../requirements/widgets/certificate_form_fields.dart';
 import '../widgets/admission_app_bar.dart';
+import 'widgets/housing_form_fields.dart';
 
 /// نموذج إضافة إعلان سكن.
 ///
-/// أعيد استخدام ودجت النماذج المبنية في المرحلة 4 (`FormFieldLabel` و
-/// `ChoiceChipsGroup`) بدل بناء نسخة ثانية منها. هذا ما يجعل نموذجاً في
-/// موديول مختلف يبدو ويتصرّف كنماذج الموديول نفسه بلا كود مكرر.
+/// أُعيد استخدام ودجت النماذج المبنية في المرحلة 4 (`FormFieldLabel` و
+/// `ChoiceChipsGroup`) بدل بناء نسخة ثانية منها، فبدا النموذج جزءاً أصيلاً
+/// من الموديول لا إضافة غريبة عليه.
 class AddHousingScreen extends StatefulWidget {
   const AddHousingScreen({super.key});
 
@@ -26,14 +27,14 @@ class AddHousingScreen extends StatefulWidget {
 class _AddHousingScreenState extends State<AddHousingScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _whatsappController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _roomsController = TextEditingController();
-  final _distanceController = TextEditingController();
+  final _name = TextEditingController();
+  final _description = TextEditingController();
+  final _phone = TextEditingController();
+  final _whatsapp = TextEditingController();
+  final _address = TextEditingController();
+  final _price = TextEditingController();
+  final _rooms = TextEditingController();
+  final _distance = TextEditingController();
 
   HousingStatus _status = HousingStatus.available;
   HousingGender _gender = HousingGender.male;
@@ -45,14 +46,14 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
   @override
   void dispose() {
     for (final controller in [
-      _nameController,
-      _descriptionController,
-      _phoneController,
-      _whatsappController,
-      _addressController,
-      _priceController,
-      _roomsController,
-      _distanceController,
+      _name,
+      _description,
+      _phone,
+      _whatsapp,
+      _address,
+      _price,
+      _rooms,
+      _distance,
     ]) {
       controller.dispose();
     }
@@ -63,8 +64,10 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
     final remaining = StorageService.maxImageCount - _images.length;
     if (remaining <= 0) return;
 
+    // ضغط الصور قبل الرفع: اتصال الطالب غالباً محدود، وصورة الهاتف الخام
+    // قد تتجاوز خمسة ميغابايت فيفشل رفع ست صور كاملاً.
     final picked = await ImagePicker().pickMultiImage(
-      imageQuality: 70, // ضغط قبل الرفع: اتصال الطالب غالباً محدود.
+      imageQuality: 70,
       limit: remaining,
     );
     if (picked.isEmpty || !mounted) return;
@@ -74,26 +77,9 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
     });
   }
 
-  String? _requiredValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'admission.housing.field_required'.tr();
-    }
-    return null;
-  }
-
-  String? _phoneValidator(String? value) {
-    final required = _requiredValidator(value);
-    if (required != null) return required;
-    // تسعة أرقام هو أقصر رقم محلي معقول؛ نتساهل عمداً لأن الصيغ تختلف.
-    final digits = value!.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.length < 9) return 'admission.housing.invalid_phone'.tr();
-    return null;
-  }
-
-  double? _parseOptionalNumber(TextEditingController controller) {
+  double? _optionalNumber(TextEditingController controller) {
     final text = controller.text.trim();
-    if (text.isEmpty) return null;
-    return double.tryParse(text);
+    return text.isEmpty ? null : double.tryParse(text);
   }
 
   Future<void> _submit() async {
@@ -109,19 +95,17 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
 
     final housing = HousingModel(
       id: '',
-      name: _nameController.text.trim(),
-      description: _descriptionController.text.trim(),
-      phone: _phoneController.text.trim(),
-      whatsapp: _whatsappController.text.trim().isEmpty
-          ? null
-          : _whatsappController.text.trim(),
-      addressText: _addressController.text.trim(),
-      distanceKm: _parseOptionalNumber(_distanceController) ?? 0,
+      name: _name.text.trim(),
+      description: _description.text.trim(),
+      phone: _phone.text.trim(),
+      whatsapp: _whatsapp.text.trim().isEmpty ? null : _whatsapp.text.trim(),
+      addressText: _address.text.trim(),
+      distanceKm: _optionalNumber(_distance) ?? 0,
       status: _status,
       gender: _gender,
-      priceMonthly: _parseOptionalNumber(_priceController),
-      roomsAvailable: _parseOptionalNumber(_roomsController)?.toInt(),
-      // الملكية تُكتب في الخدمة من جلسة المصادقة لا من هنا — لا انتحال.
+      priceMonthly: _optionalNumber(_price),
+      roomsAvailable: _optionalNumber(_rooms)?.toInt(),
+      // الملكية تُكتب داخل الخدمة من جلسة المصادقة لا من هنا — لا انتحال.
       createdBy: '',
     );
 
@@ -136,23 +120,25 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
     if (!mounted) return;
     setState(() => _isSaving = false);
 
-    if (id == null) {
-      messenger.showSnackBar(
-        SnackBar(content: Text('admission.housing.save_failed'.tr())),
-      );
-      return;
-    }
-
     messenger.showSnackBar(
-      SnackBar(content: Text('admission.housing.saved'.tr())),
+      SnackBar(
+        content: Text(
+          id == null
+              ? 'admission.housing.save_failed'.tr()
+              : 'admission.housing.saved'.tr(),
+        ),
+      ),
     );
-    navigator.pop();
+
+    if (id != null) navigator.pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AdmissionAppBar(title: 'admission.housing.add'.tr()),
+      // نمنع التفاعل أثناء الحفظ بدل تعطيل كل حقل على حدة: الضغط المزدوج
+      // على زر النشر كان سيُنشئ إعلانين.
       body: AbsorbPointer(
         absorbing: _isSaving,
         child: Form(
@@ -160,36 +146,34 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
             children: [
-              _buildImagesSection(context),
+              HousingImagesPicker(
+                images: _images,
+                onAdd: _pickImages,
+                onRemove: (index) => setState(() => _images.removeAt(index)),
+              ),
               const SizedBox(height: 22),
 
-              FormFieldLabel(
-                text: 'admission.housing.name'.tr(),
+              HousingLabeledField(
+                label: 'admission.housing.name'.tr(),
                 icon: Icons.home_rounded,
-              ),
-              _buildTextField(
-                controller: _nameController,
-                validator: _requiredValidator,
+                controller: _name,
+                validator: HousingValidators.required,
               ),
               const SizedBox(height: 18),
 
-              FormFieldLabel(
-                text: 'admission.housing.phone'.tr(),
+              HousingLabeledField(
+                label: 'admission.housing.phone'.tr(),
                 icon: Icons.phone_rounded,
-              ),
-              _buildTextField(
-                controller: _phoneController,
+                controller: _phone,
                 keyboardType: TextInputType.phone,
-                validator: _phoneValidator,
+                validator: HousingValidators.phone,
               ),
               const SizedBox(height: 18),
 
-              FormFieldLabel(
-                text: 'admission.housing.whatsapp_optional'.tr(),
+              HousingLabeledField(
+                label: 'admission.housing.whatsapp_optional'.tr(),
                 icon: Icons.chat_rounded,
-              ),
-              _buildTextField(
-                controller: _whatsappController,
+                controller: _whatsapp,
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 18),
@@ -218,70 +202,36 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
               ),
               const SizedBox(height: 18),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FormFieldLabel(
-                          text: 'admission.housing.price'.tr(),
-                          icon: Icons.payments_outlined,
-                        ),
-                        _buildTextField(
-                          controller: _priceController,
-                          keyboardType: TextInputType.number,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FormFieldLabel(
-                          text: 'admission.housing.rooms'.tr(),
-                          icon: Icons.meeting_room_outlined,
-                        ),
-                        _buildTextField(
-                          controller: _roomsController,
-                          keyboardType: TextInputType.number,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              _buildNumbersRow(),
               const SizedBox(height: 18),
 
-              FormFieldLabel(
-                text: 'admission.housing.distance'.tr(),
+              HousingLabeledField(
+                label: 'admission.housing.distance'.tr(),
                 icon: Icons.directions_walk_rounded,
-              ),
-              _buildTextField(
-                controller: _distanceController,
+                controller: _distance,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
               ),
               const SizedBox(height: 18),
 
-              FormFieldLabel(
-                text: 'admission.housing.address'.tr(),
+              HousingLabeledField(
+                label: 'admission.housing.address'.tr(),
                 icon: Icons.place_outlined,
+                controller: _address,
+                maxLines: 2,
               ),
-              _buildTextField(controller: _addressController, maxLines: 2),
               const SizedBox(height: 18),
 
-              FormFieldLabel(
-                text: 'admission.housing.description'.tr(),
+              HousingLabeledField(
+                label: 'admission.housing.description'.tr(),
                 icon: Icons.notes_rounded,
+                controller: _description,
+                maxLines: 4,
               ),
-              _buildTextField(controller: _descriptionController, maxLines: 4),
               const SizedBox(height: 24),
 
-              _buildSubmitButton(context),
+              _buildSubmitButton(),
             ],
           ),
         ),
@@ -289,108 +239,24 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    String? Function(String?)? validator,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        isDense: true,
-        filled: true,
-        fillColor: Theme.of(context).cardColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImagesSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildNumbersRow() {
+    return Row(
       children: [
-        FormFieldLabel(
-          text: 'admission.housing.images'.tr(
-            namedArgs: {
-              'count': '${_images.length}',
-              'max': '${StorageService.maxImageCount}',
-            },
-          ),
-          icon: Icons.photo_library_outlined,
-        ),
-        SizedBox(
-          height: 92,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              if (_images.length < StorageService.maxImageCount)
-                _buildAddImageTile(context),
-              ..._images.asMap().entries.map(
-                (entry) => _buildImageTile(entry.key, entry.value),
-              ),
-            ],
+        Expanded(
+          child: HousingLabeledField(
+            label: 'admission.housing.price'.tr(),
+            icon: Icons.payments_outlined,
+            controller: _price,
+            keyboardType: TextInputType.number,
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildAddImageTile(BuildContext context) {
-    return GestureDetector(
-      onTap: _pickImages,
-      child: Container(
-        width: 88,
-        margin: const EdgeInsets.only(right: 10),
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.35),
-          ),
-        ),
-        child: Icon(
-          Icons.add_a_photo_outlined,
-          color: Theme.of(context).primaryColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImageTile(int index, File file) {
-    return Stack(
-      children: [
-        Container(
-          width: 88,
-          margin: const EdgeInsets.only(right: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            image: DecorationImage(image: FileImage(file), fit: BoxFit.cover),
-          ),
-        ),
-        Positioned(
-          top: 4,
-          right: 14,
-          child: GestureDetector(
-            onTap: () => setState(() => _images.removeAt(index)),
-            child: Container(
-              padding: const EdgeInsets.all(3),
-              decoration: const BoxDecoration(
-                color: Colors.black54,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.close, size: 14, color: Colors.white),
-            ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: HousingLabeledField(
+            label: 'admission.housing.rooms'.tr(),
+            icon: Icons.meeting_room_outlined,
+            controller: _rooms,
+            keyboardType: TextInputType.number,
           ),
         ),
       ],
@@ -400,8 +266,9 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
   /// زر الحفظ مع تقدّم الرفع.
   ///
   /// عرض «٢ من ٥» أثناء الرفع لا مجرد دوّارة: رفع ست صور على اتصال ضعيف
-  /// يستغرق دقيقة، ومؤشر بلا تقدّم يجعل المستخدم يظنّه معلّقاً فيغلق الشاشة.
-  Widget _buildSubmitButton(BuildContext context) {
+  /// يستغرق دقيقة، ومؤشر بلا تقدّم يجعل المستخدم يظنّه معلّقاً فيغلق الشاشة
+  /// ويفقد ما كتبه.
+  Widget _buildSubmitButton() {
     return FilledButton.icon(
       onPressed: _isSaving ? null : _submit,
       icon: _isSaving

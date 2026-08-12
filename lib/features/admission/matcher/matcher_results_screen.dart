@@ -12,6 +12,7 @@ import '../models/matcher_outcome.dart';
 import '../widgets/admission_app_bar.dart';
 import '../widgets/admission_state_views.dart';
 import 'what_if_screen.dart';
+import 'widgets/matcher_summary_bar.dart';
 import 'widgets/suggestion_card.dart';
 
 /// شاشة نتائج مساعد اختيار التخصص.
@@ -154,7 +155,12 @@ class _MatcherResultsScreenState extends State<MatcherResultsScreen> {
 
     return Column(
       children: [
-        _buildSummary(context, outcome),
+        MatcherSummaryBar(
+          outcome: outcome,
+          eligibleOnly: _eligibleOnly,
+          onEligibleOnlyChanged: (value) =>
+              setState(() => _eligibleOnly = value),
+        ),
         Expanded(
           child: visible.isEmpty
               ? AdmissionEmptyState(
@@ -176,130 +182,6 @@ class _MatcherResultsScreenState extends State<MatcherResultsScreen> {
         ),
         _buildBottomBar(context, bundle),
       ],
-    );
-  }
-
-  /// شريط الملخّص: كم مؤهَّل، كم قريب، وكم استُبعد لعدم نشر شروطه.
-  Widget _buildSummary(BuildContext context, MatcherOutcome outcome) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _buildStat(
-                context,
-                value: '${outcome.eligibleCount}',
-                labelKey: 'admission.matcher.stat_eligible',
-                color: const Color(0xFF00A152),
-              ),
-              _buildStat(
-                context,
-                value: '${outcome.borderlineCount}',
-                labelKey: 'admission.matcher.stat_borderline',
-                color: const Color(0xFFEF6C00),
-              ),
-              _buildStat(
-                context,
-                value: '${outcome.suggestions.length}',
-                labelKey: 'admission.matcher.stat_total',
-                color: Theme.of(context).primaryColor,
-              ),
-            ],
-          ),
-          if (outcome.skippedForMissingRequirements > 0) ...[
-            const SizedBox(height: 10),
-            _buildSkippedNotice(outcome.skippedForMissingRequirements),
-          ],
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(
-                Icons.filter_alt_rounded,
-                size: 16,
-                color: Colors.grey.shade600,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'admission.matcher.eligible_only'.tr(),
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Switch(
-                value: _eligibleOnly,
-                onChanged: (value) => setState(() => _eligibleOnly = value),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// إبلاغ صريح عن الأقسام المستبعَدة.
-  ///
-  /// الاختفاء الصامت يوهم الطالب بأن الخيار غير موجود أصلاً، بينما الحقيقة
-  /// أن كليته لم تُنشر شروطها بعد. الفرق بين الرسالتين قرار مصيري له.
-  Widget _buildSkippedNotice(int count) {
-    return Row(
-      children: [
-        Icon(
-          Icons.info_outline_rounded,
-          size: 15,
-          color: Colors.grey.shade600,
-        ),
-        const SizedBox(width: 7),
-        Expanded(
-          child: Text(
-            'admission.matcher.skipped_notice'.tr(
-              namedArgs: {'count': '$count'},
-            ),
-            style: TextStyle(
-              fontSize: 11.5,
-              height: 1.4,
-              color: Colors.grey.shade600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStat(
-    BuildContext context, {
-    required String value,
-    required String labelKey,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            labelKey.tr(),
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-          ),
-        ],
-      ),
     );
   }
 
