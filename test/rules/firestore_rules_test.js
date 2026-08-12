@@ -67,9 +67,9 @@ beforeEach(async () => {
       text: 'مرحبا',
     });
     await setDoc(doc(db, 'housings', 'h1'), {
-      ownerId: STUDENT,
-      moderationStatus: 'pending',
-      title: 'سكن',
+      createdBy: STUDENT,
+      moderationStatus: 'published',
+      name: 'سكن',
     });
   });
 });
@@ -232,51 +232,93 @@ describe('٥. الشات — منع انتحال الهوية وحذف رسائ�
   });
 });
 
-describe('٦. محتوى المستخدمين — لا اعتماد ذاتي', () => {
-  it('المستخدم يضيف سكناً بحالة (قيد المراجعة)', async () => {
+describe('٦. محتوى المستخدمين — ملكية صريحة ولا تلاعب بحالة المراجعة', () => {
+  it('المستخدم يضيف سكناً باسمه', async () => {
     await assertSucceeds(
       setDoc(doc(asStudent(), 'housings', 'h2'), {
-        ownerId: STUDENT,
-        moderationStatus: 'pending',
-        title: 'سكن جديد',
+        createdBy: STUDENT,
+        moderationStatus: 'published',
+        name: 'سكن جديد',
       })
     );
   });
 
-  it('لا يستطيع نشر إعلانه معتمَداً مباشرة', async () => {
+  it('لا يستطيع إضافة سكن باسم غيره', async () => {
     await assertFails(
       setDoc(doc(asStudent(), 'housings', 'h3'), {
-        ownerId: STUDENT,
+        createdBy: OTHER,
         moderationStatus: 'published',
-        title: 'تجاوز المراجعة',
+        name: 'منتحل',
       })
     );
   });
 
-  it('لا يستطيع اعتماد إعلانه بعد إنشائه', async () => {
+  it('لا يستطيع إلغاء رفض المشرف بتعديل حالة المراجعة', async () => {
+    // السيناريو: المشرف رفض الإعلان، فيحاول صاحبه إعادته إلى «منشور».
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'housings', 'h4'), {
+        createdBy: STUDENT,
+        moderationStatus: 'rejected',
+        name: 'مرفوض',
+      });
+    });
+
     await assertFails(
-      updateDoc(doc(asStudent(), 'housings', 'h1'), {
+      updateDoc(doc(asStudent(), 'housings', 'h4'), {
+        createdBy: STUDENT,
         moderationStatus: 'published',
+        name: 'مرفوض',
+      })
+    );
+  });
+
+  it('لا يستطيع إنشاء محتوى بحالة (مرفوض)', async () => {
+    await assertFails(
+      setDoc(doc(asStudent(), 'housings', 'h5'), {
+        createdBy: STUDENT,
+        moderationStatus: 'rejected',
+        name: 'حالة غير مسموحة',
       })
     );
   });
 
   it('يستطيع تعديل بيانات إعلانه دون تغيير حالة المراجعة', async () => {
     await assertSucceeds(
-      updateDoc(doc(asStudent(), 'housings', 'h1'), { title: 'سكن محدّث' })
+      updateDoc(doc(asStudent(), 'housings', 'h1'), { name: 'سكن محدّث' })
     );
   });
 
-  it('المشرف يعتمد الإعلان', async () => {
+  it('المشرف يستطيع رفض الإعلان', async () => {
     await assertSucceeds(
       updateDoc(doc(asAdmin(), 'housings', 'h1'), {
-        moderationStatus: 'published',
+        moderationStatus: 'rejected',
       })
     );
   });
 
   it('مستخدم آخر لا يحذف إعلاناً ليس له', async () => {
     await assertFails(deleteDoc(doc(asOther(), 'housings', 'h1')));
+  });
+
+  it('صاحب الإعلان يحذف إعلانه', async () => {
+    await assertSucceeds(deleteDoc(doc(asStudent(), 'housings', 'h1')));
+  });
+
+  it('نماذج الاختبارات تتبع نفس قاعدة الملكية بحقل uploadedBy', async () => {
+    await assertSucceeds(
+      setDoc(doc(asStudent(), 'exam_papers', 'p1'), {
+        uploadedBy: STUDENT,
+        moderationStatus: 'published',
+        title: 'نموذج',
+      })
+    );
+    await assertFails(
+      setDoc(doc(asStudent(), 'exam_papers', 'p2'), {
+        uploadedBy: OTHER,
+        moderationStatus: 'published',
+        title: 'منتحل',
+      })
+    );
   });
 });
 

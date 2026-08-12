@@ -58,6 +58,7 @@ dependencies:
   video_player: ^2.9.2
   encrypt: ^5.0.3
   chewie: ^1.13.1
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
