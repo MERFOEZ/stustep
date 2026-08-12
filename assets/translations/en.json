@@ -401,6 +401,35 @@
       "delete": "Delete",
       "cancel": "Cancel",
       "disclaimer": "This listing was added by another user and is not verified by the university. Verify the details yourself before any financial commitment."
+    },
+    "papers": {
+      "title": "Exam Papers",
+      "my_papers": "My papers",
+      "upload": "Upload paper",
+      "publish": "Publish paper",
+      "uploading": "Uploading...",
+      "uploaded": "Paper published",
+      "upload_failed": "Upload failed — check your connection and that you are signed in",
+      "empty": "No papers for this college yet — be the first to upload",
+      "no_match": "No paper matches the selected filters",
+      "no_papers": "You have not uploaded any paper yet",
+      "search_hint": "Search by paper title or course name",
+      "paper_title": "Paper title",
+      "course_name": "Course name (optional)",
+      "type": "Paper type",
+      "year": "Exam year",
+      "term": "Term (optional)",
+      "pick_file": "Choose a PDF file",
+      "pick_file_hint": "Maximum size 10 MB",
+      "pick_file_first": "Choose the paper file first",
+      "file_too_large": "File exceeds 10 MB — compress or split it",
+      "open_failed": "Could not open the file on this device",
+      "downloads": "{count} downloads",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "delete_title": "Delete paper",
+      "delete_confirm": "\"{title}\" will be permanently deleted. Are you sure?",
+      "deleted": "Paper deleted"
     }
   }
 }
