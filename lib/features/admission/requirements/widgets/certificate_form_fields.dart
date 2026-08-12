@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -126,7 +127,7 @@ class GpaNumberField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      textDirection: TextDirection.ltr,
+      textDirection: ui.TextDirection.ltr,
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
@@ -183,7 +184,7 @@ class GraduationYearField extends StatelessWidget {
           .map(
             (year) => DropdownMenuItem<int>(
               value: year,
-              child: Text('$year', textDirection: TextDirection.ltr),
+              child: Text('$year', textDirection: ui.TextDirection.ltr),
             ),
           )
           .toList(),

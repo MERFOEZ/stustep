@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -68,7 +69,7 @@ class SubjectGradesField extends StatelessWidget {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    textDirection: TextDirection.ltr,
+                    textDirection: ui.TextDirection.ltr,
                     textAlign: TextAlign.center,
                     validator: _validateGrade,
                     decoration: InputDecoration(

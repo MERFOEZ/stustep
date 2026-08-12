@@ -2,10 +2,13 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
+import '../../core/services/download_manager_provider.dart';
 import '../../core/services/video_download_service.dart';
 import '../../core/services/video_encryption_service.dart';
+import '../../shared/widgets/download_state_button.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String courseId;
@@ -31,9 +34,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   int? _selectedLectureIndex;
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
-  
-  // Track download states: 'downloaded', 'not_downloaded', or double representing progress
-  final Map<String, dynamic> _downloadStatus = {};
   String? _currentTempFile;
 
   @override
@@ -43,14 +43,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   }
 
   Future<void> _checkInitialDownloadStatus() async {
+    final provider = context.read<DownloadManagerProvider>();
     for (int i = 0; i < widget.lectures.length; i++) {
       final videoId = _getVideoId(i);
-      final isDownloaded = await VideoDownloadService.isDownloaded(videoId);
-      if (mounted) {
-        setState(() {
-          _downloadStatus[videoId] = isDownloaded ? 'downloaded' : 'not_downloaded';
-        });
-      }
+      await provider.checkAndMarkDownloaded(videoId, courseId: widget.courseId);
     }
   }
 
@@ -147,7 +143,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     final videoUrl = lesson['url']?.toString() ?? '';
     final videoId = _getVideoId(index);
 
-    print('=== VIDEO_URL_DEBUG: $videoUrl ===');
+    debugPrint('=== VIDEO_URL_DEBUG: $videoUrl ===');
 
     if (videoUrl.isEmpty || !videoUrl.startsWith('http')) {
       if (mounted) {
@@ -157,9 +153,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     }
 
     try {
-      final isDownloaded = await VideoDownloadService.isDownloaded(videoId);
+      final isDownloaded = await VideoDownloadService.isDownloaded(videoId, courseId: widget.courseId);
       if (isDownloaded) {
-        final encPath = await VideoEncryptionService.getEncFilePath(videoId);
+        final encPath = await VideoEncryptionService.resolveFilePath(
+          videoId,
+          courseId: widget.courseId,
+        );
         _currentTempFile = await VideoEncryptionService.decryptToTemp(
           encFilePath: encPath, 
           videoId: videoId,
@@ -202,7 +201,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         });
       }
     } catch (e) {
-      print('=== VIDEO_INIT_ERROR: $e ===');
+      debugPrint('=== VIDEO_INIT_ERROR: $e ===');
       debugPrint("Error initializing video: $e");
     }
   }
@@ -225,50 +224,40 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     final downloadTitle = lesson['title']?.toString() ?? lesson['name']?.toString() ?? '';
     final videoId = _getVideoId(index);
 
-    print('=== START DOWNLOADING: $downloadUrl ===');
+    debugPrint('=== START DOWNLOADING: $downloadUrl ===');
 
     if (downloadUrl.isEmpty) {
       _showCinematicSnackBar('رابط الفيديو غير متوفر للتحميل', isError: true);
       return;
     }
 
-    setState(() {
-      _downloadStatus[videoId] = 0.0;
-    });
+    final provider = context.read<DownloadManagerProvider>();
 
-    // إشعار سينمائي فوري عند بدء التنزيل
-    _showCinematicSnackBar('تم إضافة الفيديو إلى قائمة التنزيلات 🍿');
+    // التحقق من الحد الأقصى للتحميلات المتزامنة
+    if (provider.activeCount >= DownloadManagerProvider.maxConcurrent) {
+      _showCinematicSnackBar('تمت إضافة الفيديو لقائمة الانتظار ⏳ (${provider.activeCount} تحميلات نشطة)');
+    } else {
+      _showCinematicSnackBar('تم إضافة الفيديو إلى قائمة التنزيلات 🍿');
+    }
 
-    try {
-      final String fullTitle = '${widget.title} - $downloadTitle';
-      await VideoDownloadService.downloadAndEncrypt(
-        videoId: videoId,
-        url: downloadUrl,
-        title: fullTitle,
-        courseId: widget.courseId,
-        courseName: widget.title,
-        coverImage: widget.coverImage,
-        onProgress: (progress) {
-          if (mounted) {
-            setState(() {
-              _downloadStatus[videoId] = progress;
-            });
-          }
-        },
-      );
+    // بدء التحميل عبر DownloadManagerProvider
+    final String fullTitle = '${widget.title} - $downloadTitle';
 
-      if (mounted) {
-        setState(() {
-          _downloadStatus[videoId] = 'downloaded';
-        });
+    await provider.startDownload(
+      videoId: videoId,
+      courseId: widget.courseId,
+      courseName: widget.title,
+      title: fullTitle,
+      url: downloadUrl,
+      coverImage: widget.coverImage,
+    );
+
+    // التحقق من النتيجة
+    if (mounted) {
+      final status = provider.getStatus(videoId);
+      if (status == DownloadStatus.completed) {
         _showCinematicSnackBar('تم تحميل الدرس بنجاح ✨');
-      }
-    } catch (e) {
-      print('=== DOWNLOAD ERROR: $e ===');
-      if (mounted) {
-        setState(() {
-          _downloadStatus[videoId] = 'not_downloaded';
-        });
+      } else if (status == DownloadStatus.failed) {
         _showCinematicSnackBar('فشل تحميل الدرس، يرجى المحاولة لاحقاً', isError: true);
       }
     }
@@ -405,8 +394,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         final lesson = widget.lectures[index] as Map<String, dynamic>;
         final lessonTitle = lesson['title']?.toString() ?? lesson['name']?.toString() ?? '';
         final videoUrl = lesson['url']?.toString() ?? '';
-        final videoId = _getVideoId(index);
-        final status = _downloadStatus[videoId] ?? 'not_downloaded';
         final isSelected = _selectedLectureIndex == index;
 
         return FadeInUp(
@@ -416,7 +403,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             index: index,
             title: lessonTitle,
             videoUrl: videoUrl,
-            status: status,
             isSelected: isSelected,
           ),
         );
@@ -428,7 +414,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     required int index,
     required String title,
     required String videoUrl,
-    required dynamic status,
     required bool isSelected,
   }) {
     final theme = Theme.of(context);
@@ -491,40 +476,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               ),
             ),
             
-            // Download Action
-            _buildDownloadAction(index, title, videoUrl, status),
+            // ═══ DownloadStateButton السينمائي ═══
+            DownloadStateButton(
+              videoId: _getVideoId(index),
+              accentColor: primary,
+              onDownloadTap: () => _downloadVideo(index),
+              onPlayTap: () => _playVideo(index),
+            ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildDownloadAction(int index, String title, String videoUrl, dynamic status) {
-    if (status == 'downloaded') {
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Icon(Icons.check_circle, color: Theme.of(context).primaryColor),
-      );
-    } else if (status is double) {
-      // Downloading
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            value: status,
-            strokeWidth: 2,
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-      );
-    } else {
-      // not_downloaded
-      return IconButton(
-        icon: const Icon(Icons.download_rounded, color: Colors.grey),
-        onPressed: () => _downloadVideo(index),
-      );
-    }
   }
 }

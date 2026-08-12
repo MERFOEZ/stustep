@@ -518,6 +518,7 @@ class _CourseDownloadsScreenState extends State<CourseDownloadsScreen>
               videoId: videoId,
               onlineUrl: url,
               gradient: gradient,
+              courseId: widget.courseId,
             ),
           ),
         ).then((_) => _loadVideos());
@@ -612,7 +613,7 @@ class _CourseDownloadsScreenState extends State<CourseDownloadsScreen>
                           children: [
                             // File size
                             FutureBuilder<String>(
-                              future: VideoDownloadService.getFileSizeMB(videoId),
+                              future: VideoDownloadService.getFileSizeMB(videoId, courseId: widget.courseId),
                               builder: (context, snapshot) {
                                 return Text(
                                   snapshot.data ?? '...',

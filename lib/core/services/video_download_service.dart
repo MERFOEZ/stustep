@@ -13,15 +13,21 @@ class VideoDownloadService {
     BaseOptions(
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(minutes: 10),
+      headers: {
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Connection': 'keep-alive',
+        'Accept': '*/*',
+      },
     ),
   );
 
   // ======== التحقق من الحالة ========
 
   /// يُعيد true إذا كان الفيديو محمّلاً ومشفراً بالفعل
-  static Future<bool> isDownloaded(String videoId) async {
-    final path = await VideoEncryptionService.getEncFilePath(videoId);
-    return File(path).exists();
+  /// يجب تمرير [courseId] للبحث في المجلد الصحيح
+  static Future<bool> isDownloaded(String videoId, {String courseId = ''}) async {
+    return await VideoEncryptionService.fileExistsForVideo(videoId, courseId: courseId);
   }
 
   // ======== حفظ بيانات التحميل (Metadata) ========
@@ -32,19 +38,28 @@ class VideoDownloadService {
   static Future<List<Map<String, dynamic>>> getDownloadedVideos() async {
     final prefs = await SharedPreferences.getInstance();
     final String? data = prefs.getString(_downloadsPrefsKey);
-    if (data == null) return [];
+    if (data == null) {
+      print('📦 [Downloads] لا توجد بيانات metadata في SharedPreferences');
+      return [];
+    }
     
     final List<dynamic> decoded = jsonDecode(data);
     final List<Map<String, dynamic>> videos = decoded.map((e) => Map<String, dynamic>.from(e)).toList();
+    print('📦 [Downloads] عدد السجلات في metadata: ${videos.length}');
     
-    // التحقق الفعلي من وجود الملفات
+    // التحقق الفعلي من وجود الملفات — مع تمرير courseId!
     List<Map<String, dynamic>> validVideos = [];
     bool listChanged = false;
     for (var video in videos) {
-      if (await isDownloaded(video['videoId'])) {
+      final videoId = video['videoId'] as String? ?? '';
+      final courseId = video['courseId'] as String? ?? '';
+      final exists = await isDownloaded(videoId, courseId: courseId);
+      print('📦 [Downloads] فحص: $videoId (course: $courseId) → exists=$exists');
+      if (exists) {
         validVideos.add(video);
       } else {
         listChanged = true;
+        print('⚠️ [Downloads] ملف غير موجود فعلياً — سيتم حذفه من metadata: $videoId');
       }
     }
     
@@ -52,6 +67,7 @@ class VideoDownloadService {
       await prefs.setString(_downloadsPrefsKey, jsonEncode(validVideos));
     }
     
+    print('📦 [Downloads] عدد الفيديوهات الصالحة: ${validVideos.length}');
     return validVideos;
   }
 
@@ -73,6 +89,10 @@ class VideoDownloadService {
       groups[courseId]!['videoCount'] = (groups[courseId]!['videoCount'] as int) + 1;
     }
 
+    print('📂 [Downloads] عدد المجلدات (الدورات): ${groups.length}');
+    for (var g in groups.values) {
+      print('📂 [Downloads]   → ${g['courseName']} (${g['courseId']}): ${g['videoCount']} فيديو');
+    }
     return groups.values.toList();
   }
 
@@ -88,7 +108,10 @@ class VideoDownloadService {
     int totalBytes = 0;
     for (var video in videos) {
       try {
-        final path = await VideoEncryptionService.getEncFilePath(video['videoId']);
+        final path = await VideoEncryptionService.resolveFilePath(
+          video['videoId'],
+          courseId: video['courseId'] ?? '',
+        );
         final file = File(path);
         if (await file.exists()) {
           totalBytes += await file.length();
@@ -115,7 +138,10 @@ class VideoDownloadService {
     int totalBytes = 0;
     for (var video in videos) {
       try {
-        final path = await VideoEncryptionService.getEncFilePath(video['videoId']);
+        final path = await VideoEncryptionService.resolveFilePath(
+          video['videoId'],
+          courseId: video['courseId'] ?? '',
+        );
         final file = File(path);
         if (await file.exists()) {
           totalBytes += await file.length();
@@ -140,12 +166,17 @@ class VideoDownloadService {
     required String coverImage,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final List<Map<String, dynamic>> videos = await getDownloadedVideos();
+    
+    // جلب القائمة الخام بدون فحص الملفات (لتجنب الدورة اللانهائية)
+    final String? rawData = prefs.getString(_downloadsPrefsKey);
+    final List<Map<String, dynamic>> videos = rawData != null
+        ? (jsonDecode(rawData) as List).map((e) => Map<String, dynamic>.from(e)).toList()
+        : [];
     
     // التأكد من عدم التكرار
     videos.removeWhere((v) => v['videoId'] == videoId);
     
-    videos.add({
+    final entry = {
       'videoId': videoId,
       'title': title,
       'url': url,
@@ -153,9 +184,11 @@ class VideoDownloadService {
       'courseName': courseName,
       'coverImage': coverImage,
       'downloadDate': DateTime.now().toIso8601String(),
-    });
+    };
+    videos.add(entry);
     
     await prefs.setString(_downloadsPrefsKey, jsonEncode(videos));
+    print('✅ [Metadata] تم حفظ: $videoId | course=$courseId ($courseName) | total=${videos.length}');
   }
 
   /// إزالة فيديو من القائمة
@@ -169,16 +202,17 @@ class VideoDownloadService {
 
   // ======== التحميل والتشفير ========
 
-  /// تحميل الفيديو من Archive.org وتشفيره مباشرة دون حفظ .mp4
+  /// تحميل الفيديو من الإنترنت وتشفيره مباشرة دون حفظ .mp4
   ///
   /// [videoId]      معرف الفيديو (e.g. "flutter_lecture_01")
-  /// [url]          الرابط المباشر للملف على Archive.org
+  /// [url]          الرابط المباشر للملف
   /// [title]        عنوان الفيديو
   /// [courseId]     معرف الدورة التي ينتمي إليها الفيديو
   /// [courseName]   اسم الدورة
   /// [coverImage]   رابط صورة غلاف الدورة
+  /// [cancelToken]  للإلغاء من DownloadManagerProvider
   /// [onProgress]   callback لتحديث شريط التقدم (0.0 → 1.0)
-  /// يُعيد مسار الملف المشفر .enc عند الاكتمال
+  /// يُعيد مسار الملف المشفر .stustep عند الاكتمال
   static Future<String> downloadAndEncrypt({
     required String videoId,
     required String url,
@@ -186,14 +220,19 @@ class VideoDownloadService {
     String courseId = '',
     String courseName = '',
     String coverImage = '',
+    CancelToken? cancelToken,
     void Function(double progress)? onProgress,
   }) async {
-    final encPath = await VideoEncryptionService.getEncFilePath(videoId);
+    final encPath = await VideoEncryptionService.getEncFilePath(
+      videoId,
+      courseId: courseId,
+    );
 
     // التحميل كـ bytes مباشرة في الذاكرة (لا يُحفظ .mp4)
     final response = await _dio.get<List<int>>(
       url,
       options: Options(responseType: ResponseType.bytes),
+      cancelToken: cancelToken,
       onReceiveProgress: (received, total) {
         if (total > 0 && onProgress != null) {
           onProgress(received / total);
@@ -207,7 +246,7 @@ class VideoDownloadService {
 
     final videoBytes = Uint8List.fromList(response.data!);
 
-    // التشفير الفوري وحفظ .enc فقط
+    // التشفير الفوري وحفظ .stustep فقط
     await VideoEncryptionService.encryptAndSave(
       videoBytes: videoBytes,
       encFilePath: encPath,
@@ -230,20 +269,48 @@ class VideoDownloadService {
 
   /// حذف الملف المشفر من القرص (لتحرير المساحة)
   static Future<void> deleteDownload(String videoId) async {
-    final path = await VideoEncryptionService.getEncFilePath(videoId);
+    // البحث في metadata لاسترجاع courseId
+    final videos = await getDownloadedVideos();
+    String courseId = '';
+    for (final v in videos) {
+      if (v['videoId'] == videoId) {
+        courseId = v['courseId'] ?? '';
+        break;
+      }
+    }
+
+    // حذف الملف — البحث في جميع المسارات الممكنة
+    final path = await VideoEncryptionService.resolveFilePath(
+      videoId,
+      courseId: courseId,
+    );
     final file = File(path);
     if (await file.exists()) {
       await file.delete();
     }
+
     await _removeVideoMetadata(videoId);
+
+    // حذف مجلد الدورة إذا أصبح فارغاً
+    if (courseId.isNotEmpty) {
+      try {
+        final dir = file.parent;
+        if (await dir.exists()) {
+          final remaining = await dir.list().length;
+          if (remaining == 0) {
+            await dir.delete();
+          }
+        }
+      } catch (_) {}
+    }
   }
 
   // ======== حجم الملف المشفر ========
 
   /// حجم الملف المشفر بالميغابايت (للعرض في الواجهة)
-  static Future<String> getFileSizeMB(String videoId) async {
+  static Future<String> getFileSizeMB(String videoId, {String courseId = ''}) async {
     try {
-      final path = await VideoEncryptionService.getEncFilePath(videoId);
+      final path = await VideoEncryptionService.resolveFilePath(videoId, courseId: courseId);
       final file = File(path);
       if (!await file.exists()) return '0 MB';
       final sizeBytes = await file.length();

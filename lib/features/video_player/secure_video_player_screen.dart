@@ -23,12 +23,16 @@ class SecureVideoPlayerScreen extends StatefulWidget {
   /// تدرج ألوان يُستخدم في شريط العنوان
   final Gradient? gradient;
 
+  /// معرف الدورة للبحث في المجلد الصحيح
+  final String courseId;
+
   const SecureVideoPlayerScreen({
     super.key,
     required this.videoTitle,
     required this.videoId,
     required this.onlineUrl,
     this.gradient,
+    this.courseId = '',
   });
 
   @override
@@ -90,7 +94,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   // ════════════════════════════════════════════════════════════════════════
 
   Future<void> _initialize() async {
-    final offline = await VideoDownloadService.isDownloaded(widget.videoId);
+    final offline = await VideoDownloadService.isDownloaded(widget.videoId, courseId: widget.courseId);
     if (mounted) {
       setState(() => _isOfflineAvailable = offline);
     }
@@ -112,8 +116,12 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
         // ── وضع أوفلاين: فك التشفير اللحظي ──────────────────────────────
         setState(() => _isDecrypting = true);
 
-        final encPath = await VideoEncryptionService.getEncFilePath(
+        // ═══ استخدام resolveFilePath بدلاً من getEncFilePath ═══
+        // يبحث في المجلد الصحيح: stustep_videos/{courseId}/{videoId}.stustep
+        // مع fallback للمسار القديم المسطح للتوافق
+        final encPath = await VideoEncryptionService.resolveFilePath(
           widget.videoId,
+          courseId: widget.courseId,
         );
         final tempPath = await VideoEncryptionService.decryptToTemp(
           encFilePath: encPath,
@@ -755,7 +763,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   Widget _buildDownloadSection(Color primaryColor) {
     if (_isOfflineAvailable) {
       return FutureBuilder<String>(
-        future: VideoDownloadService.getFileSizeMB(widget.videoId),
+        future: VideoDownloadService.getFileSizeMB(widget.videoId, courseId: widget.courseId),
         builder: (_, snap) {
           final size = snap.data ?? '...';
           return Container(

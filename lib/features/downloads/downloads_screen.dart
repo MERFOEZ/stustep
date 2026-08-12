@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:provider/provider.dart';
+import '../../core/services/download_manager_provider.dart';
 import '../../core/services/video_download_service.dart';
 import 'course_downloads_screen.dart';
 
@@ -18,6 +20,9 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   bool _isLoading = true;
   String _totalSize = '0 MB';
   late AnimationController _shimmerController;
+
+  /// آخر قيمة معروفة لعدّاد الاكتمال — لمراقبة التغيير التفاعلي
+  int _lastCompletedCount = -1;
 
   // Curated cinematic gradients
   static const List<List<Color>> _gradientPairs = [
@@ -48,8 +53,10 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   }
 
   Future<void> _loadCourseGroups() async {
+    print('🖥️ [DownloadsScreen] _loadCourseGroups() — جاري جلب المجلدات...');
     final groups = await VideoDownloadService.getCourseGroups();
     final size = await VideoDownloadService.getTotalDownloadSizeFormatted();
+    print('🖥️ [DownloadsScreen] النتيجة: ${groups.length} مجلد | الحجم: $size');
     if (mounted) {
       setState(() {
         _courseGroups = groups;
@@ -62,6 +69,20 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // الاستماع للتحميلات النشطة في الوقت الفعلي
+    final downloadProvider = context.watch<DownloadManagerProvider>();
+    final activeDownloads = downloadProvider.activeDownloads;
+    final hasActive = activeDownloads.isNotEmpty;
+
+    // ═══ التحديث التفاعلي: هل اكتمل تحميل جديد؟ ═══
+    // context.watch يعيد البناء عند كل notifyListeners()
+    // نتحقق: هل تغيّر عدّاد الاكتمال؟ → أعد جلب المجلدات من SharedPreferences
+    final currentCompleted = downloadProvider.completedCount;
+    if (_lastCompletedCount != -1 && currentCompleted != _lastCompletedCount) {
+      // ScheduleMicrotask لتجنب setState أثناء build
+      Future.microtask(() => _loadCourseGroups());
+    }
+    _lastCompletedCount = currentCompleted;
 
     return Scaffold(
       body: Container(
@@ -77,9 +98,9 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         ),
         child: _isLoading
             ? _buildLoadingState()
-            : _courseGroups.isEmpty
+            : (!hasActive && _courseGroups.isEmpty)
                 ? _buildEmptyState(isDark)
-                : _buildContent(isDark),
+                : _buildContent(isDark, activeDownloads),
       ),
     );
   }
@@ -172,7 +193,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
   // ──────────────────────────── Content ─────────────────────────────
 
-  Widget _buildContent(bool isDark) {
+  Widget _buildContent(bool isDark, List<DownloadTask> activeDownloads) {
     return CustomScrollView(
       slivers: [
         // Storage bar at top
@@ -182,59 +203,293 @@ class _DownloadsScreenState extends State<DownloadsScreen>
             child: _buildStorageBar(isDark),
           ),
         ),
-        // Section title
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+
+        // ═══════════════ قسم التحميلات النشطة (Active Downloads) ═══════════════
+        if (activeDownloads.isNotEmpty) ...[
+          SliverToBoxAdapter(
             child: FadeInDown(
-              delay: const Duration(milliseconds: 200),
+              delay: const Duration(milliseconds: 100),
               duration: const Duration(milliseconds: 600),
-              child: ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [Color(0xFF6200EE), Color(0xFFE91E63)],
-                ).createShader(bounds),
-                child: Text(
-                  'downloads'.tr(),
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Row(
+                  children: [
+                    // أيقونة متحركة
+                    _AnimatedDownloadIcon(controller: _shimmerController),
+                    const SizedBox(width: 10),
+                    Text(
+                      'جاري التحميل',
+                      style: TextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: isDark ? Colors.white : Colors.grey.shade800,
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Badge عدد التحميلات
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6200EE).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${activeDownloads.length}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF6200EE),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        ),
-        // Course folders grid
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.78,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final group = _courseGroups[index];
-                final colors = _gradientPairs[index % _gradientPairs.length];
-
-                return FadeInUp(
-                  delay: Duration(milliseconds: 120 * index),
-                  duration: const Duration(milliseconds: 800),
-                  child: _buildCourseFolderCard(
-                    context,
-                    group: group,
-                    gradientColors: colors,
-                    isDark: isDark,
-                  ),
-                );
-              },
-              childCount: _courseGroups.length,
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final task = activeDownloads[index];
+                  return FadeInDown(
+                    delay: Duration(milliseconds: 80 * index),
+                    duration: const Duration(milliseconds: 500),
+                    child: _buildActiveDownloadCard(task, isDark),
+                  );
+                },
+                childCount: activeDownloads.length,
+              ),
             ),
           ),
-        ),
+        ],
+
+        // ═══════════════ عنوان المجلدات المحملة ═══════════════
+        if (_courseGroups.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+              child: FadeInDown(
+                delay: const Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 600),
+                child: ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [Color(0xFF6200EE), Color(0xFFE91E63)],
+                  ).createShader(bounds),
+                  child: Text(
+                    'downloads'.tr(),
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Course folders grid
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.78,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final group = _courseGroups[index];
+                  final colors = _gradientPairs[index % _gradientPairs.length];
+
+                  return FadeInUp(
+                    delay: Duration(milliseconds: 120 * index),
+                    duration: const Duration(milliseconds: 800),
+                    child: _buildCourseFolderCard(
+                      context,
+                      group: group,
+                      gradientColors: colors,
+                      isDark: isDark,
+                    ),
+                  );
+                },
+                childCount: _courseGroups.length,
+              ),
+            ),
+          ),
+        ],
       ],
+    );
+  }
+
+  // ──────────────────── Active Download Card (YouTube-style) ─────────
+
+  Widget _buildActiveDownloadCard(DownloadTask task, bool isDark) {
+    final percent = (task.progress * 100).toInt();
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.06)
+            : Colors.white.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: primaryColor.withValues(alpha: isDark ? 0.2 : 0.12),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // معلومات الفيديو + زر إلغاء
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 8, 8),
+            child: Row(
+              children: [
+                // أيقونة الدورة مع gradient
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        primaryColor,
+                        primaryColor.withValues(alpha: 0.7),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.video_library_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // عنوان الفيديو والدورة
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.title.isNotEmpty ? task.title : 'فيديو قيد التحميل',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: isDark ? Colors.white : Colors.grey.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        task.courseName.isNotEmpty ? task.courseName : '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // نسبة التقدم
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '$percent%',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                ),
+                // زر الإلغاء
+                IconButton(
+                  onPressed: () {
+                    context.read<DownloadManagerProvider>().cancelDownload(task.videoId);
+                  },
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: Colors.grey.shade400,
+                    size: 20,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
+              ],
+            ),
+          ),
+          // ═══ شريط التقدم الخطي (YouTube-style) ═══
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+            ),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: task.progress),
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+              builder: (context, value, _) {
+                return Stack(
+                  children: [
+                    // الخلفية
+                    Container(
+                      height: 4,
+                      width: double.infinity,
+                      color: primaryColor.withValues(alpha: 0.08),
+                    ),
+                    // شريط التقدم مع gradient
+                    FractionallySizedBox(
+                      widthFactor: value.clamp(0.0, 1.0),
+                      child: Container(
+                        height: 4,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              primaryColor,
+                              const Color(0xFFE91E63),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: primaryColor.withValues(alpha: 0.5),
+                              blurRadius: 6,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -565,6 +820,48 @@ class _DownloadsScreenState extends State<DownloadsScreen>
           ),
         ),
       ),
+    );
+  }
+}
+
+// ═══════════════ أيقونة التحميل المتحركة ═══════════════
+
+class _AnimatedDownloadIcon extends StatelessWidget {
+  final AnimationController controller;
+
+  const _AnimatedDownloadIcon({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        return Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF6200EE).withValues(
+              alpha: 0.1 + 0.08 * controller.value,
+            ),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6200EE).withValues(
+                  alpha: 0.15 * controller.value,
+                ),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.downloading_rounded,
+            color: const Color(0xFF6200EE).withValues(
+              alpha: 0.7 + 0.3 * controller.value,
+            ),
+            size: 20,
+          ),
+        );
+      },
     );
   }
 }
