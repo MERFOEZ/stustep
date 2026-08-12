@@ -19,7 +19,7 @@
   "marketplace": "Marketplace",
   "scholarship_radar": "Scholarship Radar",
   "no_downloads": "No downloads yet",
-  "welcome_back": "Welcome back, Student!",
+  "welcome_back": "Welcome back, {}!",
   "select_model": "Select AI Model",
   "model_deepseek": "DeepSeek R1",
   "model_gemini": "Gemini 1.5 Pro",
