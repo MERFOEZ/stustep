@@ -2,7 +2,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/services/video_download_service.dart';
+import '../../core/services/video_metadata_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../shared/widgets/cinematic_lesson_badge.dart';
 import '../video_player/secure_video_player_screen.dart';
 
 /// شاشة فيديوهات الدورة المحملة — مع حذف فردي وأنميشن سينمائي
@@ -510,15 +512,21 @@ class _CourseDownloadsScreenState extends State<CourseDownloadsScreen>
 
     return GestureDetector(
       onTap: () {
+        // بناء قائمة التشغيل من جميع الفيديوهات المحملة
+        final playlist = _videos.map((v) => {
+          'videoId': v['videoId']?.toString() ?? '',
+          'title': v['title']?.toString() ?? '',
+          'url': v['url']?.toString() ?? '',
+        }).toList();
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => SecureVideoPlayerScreen(
-              videoTitle: title,
-              videoId: videoId,
-              onlineUrl: url,
-              gradient: gradient,
+              playlist: playlist,
+              initialIndex: index,
               courseId: widget.courseId,
+              gradient: gradient,
             ),
           ),
         ).then((_) => _loadVideos());
@@ -609,37 +617,44 @@ class _CourseDownloadsScreenState extends State<CourseDownloadsScreen>
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            // File size
-                            FutureBuilder<String>(
-                              future: VideoDownloadService.getFileSizeMB(videoId, courseId: widget.courseId),
-                              builder: (context, snapshot) {
-                                return Text(
-                                  snapshot.data ?? '...',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white.withValues(alpha: 0.85),
-                                  ),
-                                );
-                              },
-                            ),
-                            Text(
-                              ' • ',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.6),
-                                fontSize: 12,
-                              ),
-                            ),
-                            // Download date
-                            Text(
-                              _formatDate(downloadDate),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white.withValues(alpha: 0.75),
-                              ),
-                            ),
-                          ],
+                        // ═══ كبسولات البيانات الحقيقية (Frosted Glass Badges) ═══
+                        FutureBuilder<VideoMeta>(
+                          future: VideoMetadataService.getFullMetadata(
+                            videoId,
+                            courseId: widget.courseId,
+                            videoUrl: url,
+                            title: title,
+                          ),
+                          builder: (context, metaSnap) {
+                            final meta = metaSnap.data;
+                            return Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                CinematicBadge.fileSize(
+                                  size: meta?.fileSize ?? '',
+                                  isDark: true,
+                                ),
+                                CinematicBadge.duration(
+                                  duration: meta?.duration ?? '',
+                                  isDark: true,
+                                ),
+                                CinematicBadge.resolution(
+                                  resolution: meta?.resolution ?? '',
+                                  isDark: true,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 4),
+                        // تاريخ التحميل
+                        Text(
+                          _formatDate(downloadDate),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.6),
+                          ),
                         ),
                       ],
                     ),

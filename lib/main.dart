@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/download_manager_provider.dart';
 import 'features/splash/splash_screen.dart';
 
 void main() async {
@@ -27,7 +28,10 @@ void main() async {
       fallbackLocale: const Locale('ar'),
       startLocale: const Locale('ar'),
       child: MultiProvider(
-        providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider(create: (_) => DownloadManagerProvider()),
+        ],
         child: const StuStepApp(),
       ),
     ),

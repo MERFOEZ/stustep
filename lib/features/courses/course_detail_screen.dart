@@ -8,7 +8,10 @@ import 'package:chewie/chewie.dart';
 import '../../core/services/download_manager_provider.dart';
 import '../../core/services/video_download_service.dart';
 import '../../core/services/video_encryption_service.dart';
+import '../../core/services/video_metadata_service.dart';
 import '../../shared/widgets/download_state_button.dart';
+import '../../shared/widgets/cinematic_lesson_badge.dart';
+import '../video_player/secure_video_player_screen.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String courseId;
@@ -263,6 +266,36 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     }
   }
 
+  /// فتح المشغل السينمائي بقائمة التشغيل الكاملة
+  void _openCinematicPlayer(int startIndex) {
+    // بناء قائمة التشغيل من جميع الدروس
+    final playlist = <Map<String, dynamic>>[];
+    for (int i = 0; i < widget.lectures.length; i++) {
+      final lesson = widget.lectures[i] as Map<String, dynamic>;
+      playlist.add({
+        'videoId': _getVideoId(i),
+        'title': lesson['title']?.toString() ?? lesson['name']?.toString() ?? 'الدرس ${i + 1}',
+        'url': lesson['url']?.toString() ?? '',
+      });
+    }
+
+    // تنظيف المشغل المدمج أولاً
+    _cleanupPlayer();
+    setState(() => _selectedLectureIndex = null);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SecureVideoPlayerScreen(
+          playlist: playlist,
+          initialIndex: startIndex,
+          courseId: widget.courseId,
+          gradient: widget.gradient,
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _cleanupPlayer();
@@ -340,6 +373,17 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 onPressed: () => Navigator.pop(context),
               ),
             ),
+            // زر فتح المشغل السينمائي الكامل
+            if (_selectedLectureIndex != null)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  icon: const Icon(Icons.open_in_full_rounded, color: Colors.white),
+                  tooltip: 'فتح المشغل السينمائي',
+                  onPressed: () => _openCinematicPlayer(_selectedLectureIndex!),
+                ),
+              ),
           ],
         ),
       ),
@@ -395,15 +439,36 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         final lessonTitle = lesson['title']?.toString() ?? lesson['name']?.toString() ?? '';
         final videoUrl = lesson['url']?.toString() ?? '';
         final isSelected = _selectedLectureIndex == index;
+        final videoId = _getVideoId(index);
+
+        // الدقة الديناميكية: تحليل الاسم/URL أولاً
+        final parsedResolution = VideoMetadataService.parseResolution(
+          videoUrl,
+          title: lessonTitle,
+        );
 
         return FadeInUp(
-          duration: const Duration(milliseconds: 400),
-          delay: Duration(milliseconds: index * 50),
-          child: _buildLectureCard(
-            index: index,
-            title: lessonTitle,
-            videoUrl: videoUrl,
-            isSelected: isSelected,
+          duration: const Duration(milliseconds: 500),
+          delay: Duration(milliseconds: index * 100),
+          child: FutureBuilder<VideoMeta>(
+            future: VideoMetadataService.getFullMetadata(
+              videoId,
+              courseId: widget.courseId,
+              videoUrl: videoUrl,
+              title: lessonTitle,
+            ),
+            builder: (context, snapshot) {
+              final meta = snapshot.data;
+              return _buildLectureCard(
+                index: index,
+                title: lessonTitle,
+                videoUrl: videoUrl,
+                isSelected: isSelected,
+                duration: meta?.duration ?? '',
+                fileSize: meta?.fileSize ?? '',
+                resolution: meta?.resolution ?? parsedResolution,
+              );
+            },
           ),
         );
       },
@@ -415,47 +480,82 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     required String title,
     required String videoUrl,
     required bool isSelected,
+    String duration = '',
+    String fileSize = '',
+    String resolution = '',
   }) {
     final theme = Theme.of(context);
     final primary = theme.primaryColor;
+    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () => _playVideo(index),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? primary.withValues(alpha: 0.08) : theme.cardColor.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(15),
+          color: isSelected
+              ? primary.withValues(alpha: isDark ? 0.15 : 0.08)
+              : (isDark ? Colors.white.withValues(alpha: 0.06) : theme.cardColor),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? primary.withValues(alpha: 0.5) : Colors.grey.withValues(alpha: 0.1),
+            color: isSelected
+                ? primary.withValues(alpha: 0.5)
+                : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.withValues(alpha: 0.12)),
+            width: isSelected ? 1.5 : 1.0,
           ),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
+            if (isSelected)
+              BoxShadow(
+                color: primary.withValues(alpha: 0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              )
+            else
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
           ],
         ),
         child: Row(
           children: [
-            // Play Icon / Number
-            Container(
-              padding: const EdgeInsets.all(10),
+            // ═══ Play Icon / Number ═══
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(11),
               decoration: BoxDecoration(
-                color: isSelected ? primary : primary.withValues(alpha: 0.1),
+                gradient: isSelected
+                    ? LinearGradient(
+                        colors: [primary, primary.withValues(alpha: 0.7)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
+                color: isSelected ? null : primary.withValues(alpha: isDark ? 0.15 : 0.1),
                 shape: BoxShape.circle,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: primary.withValues(alpha: 0.4),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null,
               ),
               child: Icon(
-                isSelected ? Icons.pause : Icons.play_arrow,
+                isSelected ? Icons.pause_rounded : Icons.play_arrow_rounded,
                 color: isSelected ? Colors.white : primary,
                 size: 20,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             
-            // Title
+            // ═══ Title + Badges ═══
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,19 +564,43 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     title,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
+                      fontSize: 14,
                       color: isSelected ? primary : null,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'الدرس ${(index + 1)}',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  const SizedBox(height: 8),
+
+                  // ═══ كبسولات البيانات الوصفية (Frosted Glass Badges) ═══
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      // ترتيب الدرس
+                      CinematicBadge(
+                        icon: Icons.school_rounded,
+                        label: 'الدرس ${index + 1}',
+                        accentColor: isSelected ? primary : Colors.grey,
+                        isDark: isDark,
+                      ),
+                      // المدة
+                      CinematicBadge.duration(
+                        duration: duration,
+                        isDark: isDark,
+                      ),
+                      // الدقة
+                      CinematicBadge.resolution(
+                        resolution: resolution,
+                        isDark: isDark,
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
             
-            // ═══ DownloadStateButton السينمائي ═══
+            // ═══ Download Button ═══
             DownloadStateButton(
               videoId: _getVideoId(index),
               accentColor: primary,
@@ -489,3 +613,4 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     );
   }
 }
+

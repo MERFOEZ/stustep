@@ -1,38 +1,49 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import '../../core/services/video_encryption_service.dart';
 import '../../core/services/video_download_service.dart';
+import '../../core/services/video_metadata_service.dart';
 
-/// مشغّل الفيديو الآمن المتكامل
+/// مشغّل الفيديو الآمن السينمائي مع دعم قائمة التشغيل (Playlist)
+///
 /// يدمج:
 ///   • البث المباشر (Online) عبر URL
-///   • التشغيل الأوفلاين من ملف .enc مفكوك لحظياً
-///   • التحميل المشفر AES-256 بدون أي .mp4 على القرص
+///   • التشغيل الأوفلاين من ملف .stustep مفكوك لحظياً
+///   • التشفير AES-256 بدون أي .mp4 على القرص
+///   • التنقل بين الدروس (Next/Previous) بتأثير Cross-Fade
+///   • طبقة تحكم زجاجية (Glassmorphic Controls)
 ///   • الإتلاف التلقائي للملف المؤقت عند dispose()
 class SecureVideoPlayerScreen extends StatefulWidget {
-  final String videoTitle;
+  /// قائمة الدروس الكاملة — كل عنصر يحتوي: videoId, title, url
+  final List<Map<String, dynamic>> playlist;
 
-  /// معرف فريد للفيديو — يُستخدم لتسمية الملف المشفر (.enc)
-  final String videoId;
-
-  /// الرابط المباشر من Archive.org
-  final String onlineUrl;
-
-  /// تدرج ألوان يُستخدم في شريط العنوان
-  final Gradient? gradient;
+  /// الفهرس الابتدائي في القائمة
+  final int initialIndex;
 
   /// معرف الدورة للبحث في المجلد الصحيح
   final String courseId;
 
+  /// تدرج ألوان يُستخدم في شريط العنوان
+  final Gradient? gradient;
+
+  // ═══ معاملات التوافق مع الاستدعاءات القديمة (Legacy) ═══
+  final String? videoTitle;
+  final String? videoId;
+  final String? onlineUrl;
+
   const SecureVideoPlayerScreen({
     super.key,
-    required this.videoTitle,
-    required this.videoId,
-    required this.onlineUrl,
-    this.gradient,
+    this.playlist = const [],
+    this.initialIndex = 0,
     this.courseId = '',
+    this.gradient,
+    // Legacy params (backward compatible)
+    this.videoTitle,
+    this.videoId,
+    this.onlineUrl,
   });
 
   @override
@@ -42,6 +53,10 @@ class SecureVideoPlayerScreen extends StatefulWidget {
 
 class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     with TickerProviderStateMixin {
+  // ─── Playlist State ─────────────────────────────────────────────────────
+  late List<Map<String, dynamic>> _playlist;
+  late int _currentIndex;
+
   // ─── Video Controller ───────────────────────────────────────────────────
   VideoPlayerController? _controller;
   bool _isInitialized = false;
@@ -54,13 +69,14 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   bool _isDecrypting = false;
   bool _isFullscreen = false;
   bool _hasError = false;
+  bool _isTransitioning = false;
   String _errorMessage = '';
 
   // ─── Download Progress ──────────────────────────────────────────────────
   double _downloadProgress = 0.0;
 
   // ─── Temp File Path ─────────────────────────────────────────────────────
-  String? _tempFilePath; // يُحذف في dispose()
+  String? _tempFilePath;
 
   // ─── Position / Duration ────────────────────────────────────────────────
   Duration _position = Duration.zero;
@@ -69,11 +85,37 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   // ─── Animations ─────────────────────────────────────────────────────────
   late AnimationController _controlsFadeController;
   late AnimationController _playPulseController;
+  late AnimationController _navPulseController;
   late Animation<double> _playPulseAnim;
+  late Animation<double> _navPulseAnim;
+
+  // ─── Getters ────────────────────────────────────────────────────────────
+  bool get _hasPrevious => _currentIndex > 0;
+  bool get _hasNext => _currentIndex < _playlist.length - 1;
+  String get _currentVideoId => _playlist[_currentIndex]['videoId']?.toString() ?? '';
+  String get _currentTitle => _playlist[_currentIndex]['title']?.toString() ?? '';
+  String get _currentUrl => _playlist[_currentIndex]['url']?.toString() ?? '';
 
   @override
   void initState() {
     super.initState();
+
+    // ═══ بناء الـ Playlist ═══
+    if (widget.playlist.isNotEmpty) {
+      _playlist = List.from(widget.playlist);
+      _currentIndex = widget.initialIndex.clamp(0, widget.playlist.length - 1);
+    } else {
+      // Legacy: فيديو واحد → قائمة من عنصر واحد
+      _playlist = [
+        {
+          'videoId': widget.videoId ?? '',
+          'title': widget.videoTitle ?? '',
+          'url': widget.onlineUrl ?? '',
+        },
+      ];
+      _currentIndex = 0;
+    }
+
     _controlsFadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -86,6 +128,14 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     _playPulseAnim = Tween<double>(begin: 1.0, end: 1.3).animate(
       CurvedAnimation(parent: _playPulseController, curve: Curves.easeOut),
     );
+    _navPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _navPulseAnim = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(parent: _navPulseController, curve: Curves.elasticOut),
+    );
+
     _initialize();
   }
 
@@ -94,7 +144,10 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   // ════════════════════════════════════════════════════════════════════════
 
   Future<void> _initialize() async {
-    final offline = await VideoDownloadService.isDownloaded(widget.videoId, courseId: widget.courseId);
+    final offline = await VideoDownloadService.isDownloaded(
+      _currentVideoId,
+      courseId: widget.courseId,
+    );
     if (mounted) {
       setState(() => _isOfflineAvailable = offline);
     }
@@ -113,19 +166,15 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
       VideoPlayerController controller;
 
       if (useOffline) {
-        // ── وضع أوفلاين: فك التشفير اللحظي ──────────────────────────────
         setState(() => _isDecrypting = true);
 
-        // ═══ استخدام resolveFilePath بدلاً من getEncFilePath ═══
-        // يبحث في المجلد الصحيح: stustep_videos/{courseId}/{videoId}.stustep
-        // مع fallback للمسار القديم المسطح للتوافق
         final encPath = await VideoEncryptionService.resolveFilePath(
-          widget.videoId,
+          _currentVideoId,
           courseId: widget.courseId,
         );
         final tempPath = await VideoEncryptionService.decryptToTemp(
           encFilePath: encPath,
-          videoId: widget.videoId,
+          videoId: _currentVideoId,
         );
 
         _tempFilePath = tempPath;
@@ -133,9 +182,8 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
 
         controller = VideoPlayerController.file(File(tempPath));
       } else {
-        // ── وضع أونلاين: بث مباشر من Archive.org ─────────────────────────
         controller = VideoPlayerController.networkUrl(
-          Uri.parse(widget.onlineUrl),
+          Uri.parse(_currentUrl),
         );
       }
 
@@ -147,9 +195,12 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
       setState(() {
         _isInitialized = true;
         _duration = controller.value.duration;
+        _isTransitioning = false;
       });
 
-      // تشغيل تلقائي
+      // ═══ تخزين المدة والدقة الحقيقية في الكاش ═══
+      VideoMetadataService.cacheFromController(_currentVideoId, controller);
+
       await controller.play();
       setState(() => _isPlaying = true);
       _scheduleHideControls();
@@ -157,6 +208,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
       setState(() {
         _hasError = true;
         _isDecrypting = false;
+        _isTransitioning = false;
         _errorMessage = 'تعذّر تحميل الفيديو: ${e.toString()}';
       });
     }
@@ -173,11 +225,56 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   }
 
   // ════════════════════════════════════════════════════════════════════════
+  //  التنقل بين الدروس (Playlist Navigation)
+  // ════════════════════════════════════════════════════════════════════════
+
+  Future<void> _navigateToLesson(int newIndex) async {
+    if (newIndex < 0 || newIndex >= _playlist.length) return;
+    if (newIndex == _currentIndex) return;
+
+    HapticFeedback.mediumImpact();
+
+    // تأثير النبض على زر التنقل
+    _navPulseController.forward().then((_) => _navPulseController.reverse());
+
+    setState(() {
+      _isTransitioning = true;
+      _position = Duration.zero;
+      _duration = Duration.zero;
+    });
+
+    // تدمير المتحكم الحالي بأمان
+    _controller?.removeListener(_onVideoProgress);
+    await _controller?.pause();
+    await _controller?.dispose();
+    _controller = null;
+
+    // حذف الملف المؤقت المفكوك
+    if (_tempFilePath != null) {
+      await VideoEncryptionService.deleteTemp(_tempFilePath!);
+      _tempFilePath = null;
+    }
+
+    // تحديث الفهرس
+    setState(() {
+      _currentIndex = newIndex;
+      _isInitialized = false;
+      _isPlaying = false;
+      _downloadProgress = 0.0;
+      _isDownloading = false;
+    });
+
+    // تهيئة الدرس الجديد
+    await _initialize();
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
   //  التحكم في التشغيل
   // ════════════════════════════════════════════════════════════════════════
 
   void _togglePlayPause() {
     if (_controller == null || !_isInitialized) return;
+    HapticFeedback.lightImpact();
     _playPulseController.forward().then((_) => _playPulseController.reverse());
     if (_isPlaying) {
       _controller!.pause();
@@ -223,6 +320,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
 
   void _skip(int seconds) {
     if (_controller == null) return;
+    HapticFeedback.selectionClick();
     final newPos = _position + Duration(seconds: seconds);
     _controller!.seekTo(
       newPos.isNegative
@@ -246,9 +344,10 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
 
     try {
       await VideoDownloadService.downloadAndEncrypt(
-        videoId: widget.videoId,
-        url: widget.onlineUrl,
-        title: widget.videoTitle,
+        videoId: _currentVideoId,
+        url: _currentUrl,
+        title: _currentTitle,
+        courseId: widget.courseId,
         onProgress: (p) {
           if (mounted) setState(() => _downloadProgress = p);
         },
@@ -270,8 +369,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   }
 
   Future<void> _deleteDownload() async {
-    await VideoDownloadService.deleteDownload(widget.videoId);
-    // إعادة التشغيل أونلاين بعد حذف التحميل
+    await VideoDownloadService.deleteDownload(_currentVideoId);
     setState(() => _isOfflineAvailable = false);
     await _initPlayer(false);
     if (mounted) _showSnack('🗑 تم حذف النسخة المحفوظة');
@@ -300,13 +398,12 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     _controller?.dispose();
     _controlsFadeController.dispose();
     _playPulseController.dispose();
+    _navPulseController.dispose();
 
-    // ← الإتلاف التلقائي: مسح الملف المؤقت المفكوك فوراً
     if (_tempFilePath != null) {
       VideoEncryptionService.deleteTemp(_tempFilePath!);
     }
 
-    // إعادة الاتجاه الطبيعي للجهاز
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -330,7 +427,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
             // ── شريط العنوان ─────────────────────────────────────────────
             if (!_isFullscreen) _buildAppBar(isDark, primaryColor),
 
-            // ── منطقة الفيديو ─────────────────────────────────────────────
+            // ── منطقة الفيديو مع AnimatedSwitcher ───────────────────────
             Expanded(
               flex: _isFullscreen ? 1 : 0,
               child: AspectRatio(
@@ -351,25 +448,47 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // الفيديو
-                      _buildVideoLayer(),
-                      // Overlay التحكم
-                      if (_showControls) _buildControlsOverlay(primaryColor),
+                      // ═══ الفيديو مع Cross-Fade ═══
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 600),
+                        switchInCurve: Curves.easeInOut,
+                        switchOutCurve: Curves.easeInOut,
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                        child: _buildVideoLayer(
+                          key: ValueKey('video_$_currentIndex'),
+                        ),
+                      ),
+                      // Overlay التحكم الزجاجي
+                      if (_showControls) _buildGlassmorphicControls(primaryColor),
                       // مؤشر فك التشفير
                       if (_isDecrypting) _buildDecryptingIndicator(),
+                      // مؤشر الانتقال
+                      if (_isTransitioning) _buildTransitionIndicator(),
                       // شارة الحالة
                       Positioned(
                         top: 12,
                         right: 12,
                         child: _buildStatusBadge(),
                       ),
+                      // عدّاد الدروس
+                      if (_playlist.length > 1)
+                        Positioned(
+                          top: 12,
+                          left: 12,
+                          child: _buildLessonCounter(),
+                        ),
                     ],
                   ),
                 ),
               ),
             ),
 
-            // ── لوحة المعلومات والتحكم (أوفلاين/حذف/حجم) ────────────────
+            // ── لوحة المعلومات والتحكم ────────────────────────────────────
             if (!_isFullscreen) ...[
               Expanded(child: _buildInfoPanel(isDark, primaryColor)),
             ],
@@ -398,18 +517,32 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
             onPressed: () => Navigator.pop(context),
           ),
           Expanded(
-            child: Text(
-              widget.videoTitle,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                fontFamily: 'Cairo',
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _currentTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    fontFamily: 'Cairo',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (_playlist.length > 1)
+                  Text(
+                    'الدرس ${_currentIndex + 1} من ${_playlist.length}',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 11,
+                      fontFamily: 'Cairo',
+                    ),
+                  ),
+              ],
             ),
           ),
-          // زر حذف التحميل
           if (_isOfflineAvailable)
             IconButton(
               tooltip: 'حذف التحميل',
@@ -421,9 +554,10 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     );
   }
 
-  Widget _buildVideoLayer() {
+  Widget _buildVideoLayer({Key? key}) {
     if (_hasError) {
       return Container(
+        key: key,
         color: Colors.black,
         child: Center(
           child: Column(
@@ -456,6 +590,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
 
     if (!_isInitialized || _controller == null) {
       return Container(
+        key: key,
         color: Colors.black,
         child: Center(
           child: Column(
@@ -476,10 +611,12 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
       );
     }
 
-    return VideoPlayer(_controller!);
+    return SizedBox(key: key, child: VideoPlayer(_controller!));
   }
 
-  Widget _buildControlsOverlay(Color primaryColor) {
+  // ═══════════════════ Glassmorphic Controls ═══════════════════
+
+  Widget _buildGlassmorphicControls(Color primaryColor) {
     final progress =
         _duration.inMilliseconds > 0
             ? _position.inMilliseconds / _duration.inMilliseconds
@@ -494,43 +631,55 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xCC000000),
+              Color(0x88000000),
               Color(0x00000000),
               Color(0x00000000),
-              Color(0xCC000000),
+              Color(0xBB000000),
             ],
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // ── صف علوي ────────────────────────────────────────────────
             const SizedBox(height: 8),
 
-            // ── أزرار التحكم الوسطى ─────────────────────────────────────
+            // ═══ أزرار التحكم الوسطى مع Next/Previous ═══
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // ── زر الدرس السابق ──
+                if (_playlist.length > 1)
+                  _buildNavButton(
+                    icon: Icons.skip_previous_rounded,
+                    enabled: _hasPrevious,
+                    onTap: _hasPrevious
+                        ? () => _navigateToLesson(_currentIndex - 1)
+                        : null,
+                    tooltip: 'الدرس السابق',
+                  ),
+                if (_playlist.length > 1) const SizedBox(width: 12),
+
                 _controlBtn(
                   icon: Icons.replay_10,
                   onTap: () => _skip(-10),
                 ),
-                const SizedBox(width: 32),
-                // زر Play/Pause مع animation
+                const SizedBox(width: 20),
+
+                // ── زر Play/Pause مع Pulse ──
                 GestureDetector(
                   onTap: _togglePlayPause,
                   child: ScaleTransition(
                     scale: _playPulseAnim,
                     child: Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: primaryColor,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
                             color: primaryColor.withAlpha(120),
-                            blurRadius: 20,
-                            spreadRadius: 2,
+                            blurRadius: 24,
+                            spreadRadius: 3,
                           ),
                         ],
                       ),
@@ -544,76 +693,106 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
                     ),
                   ),
                 ),
-                const SizedBox(width: 32),
+                const SizedBox(width: 20),
+
                 _controlBtn(
                   icon: Icons.forward_10,
                   onTap: () => _skip(10),
                 ),
+
+                // ── زر الدرس التالي ──
+                if (_playlist.length > 1) const SizedBox(width: 12),
+                if (_playlist.length > 1)
+                  _buildNavButton(
+                    icon: Icons.skip_next_rounded,
+                    enabled: _hasNext,
+                    onTap: _hasNext
+                        ? () => _navigateToLesson(_currentIndex + 1)
+                        : null,
+                    tooltip: 'الدرس التالي',
+                  ),
               ],
             ),
 
-            // ── شريط التقدم والوقت ───────────────────────────────────────
+            // ═══ شريط التقدم الزجاجي ═══
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-              child: Column(
-                children: [
-                  SliderTheme(
-                    data: SliderThemeData(
-                      trackHeight: 3,
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 6,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
                       ),
-                      overlayShape: const RoundSliderOverlayShape(
-                        overlayRadius: 14,
-                      ),
-                      activeTrackColor: primaryColor,
-                      inactiveTrackColor: Colors.white30,
-                      thumbColor: Colors.white,
-                      overlayColor: primaryColor.withAlpha(60),
                     ),
-                    child: Slider(
-                      value: progress.clamp(0.0, 1.0),
-                      onChanged: _isInitialized ? _onSliderChanged : null,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          _formatDuration(_position),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                        SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 3,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 6,
+                            ),
+                            overlayShape: const RoundSliderOverlayShape(
+                              overlayRadius: 14,
+                            ),
+                            activeTrackColor: primaryColor,
+                            inactiveTrackColor: Colors.white30,
+                            thumbColor: Colors.white,
+                            overlayColor: primaryColor.withAlpha(60),
+                          ),
+                          child: Slider(
+                            value: progress.clamp(0.0, 1.0),
+                            onChanged: _isInitialized ? _onSliderChanged : null,
                           ),
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              _formatDuration(_duration),
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _formatDuration(_position),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: _toggleFullscreen,
-                              child: Icon(
-                                _isFullscreen
-                                    ? Icons.fullscreen_exit
-                                    : Icons.fullscreen,
-                                color: Colors.white,
-                                size: 22,
+                              Row(
+                                children: [
+                                  Text(
+                                    _formatDuration(_duration),
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: _toggleFullscreen,
+                                    child: Icon(
+                                      _isFullscreen
+                                          ? Icons.fullscreen_exit
+                                          : Icons.fullscreen,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -622,16 +801,59 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     );
   }
 
+  /// زر تنقل الدروس (Next/Previous) مع Bounce Effect
+  Widget _buildNavButton({
+    required IconData icon,
+    required bool enabled,
+    VoidCallback? onTap,
+    String? tooltip,
+  }) {
+    return Tooltip(
+      message: tooltip ?? '',
+      child: GestureDetector(
+        onTap: onTap,
+        child: ScaleTransition(
+          scale: _navPulseAnim,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: enabled
+                  ? Colors.white.withAlpha(35)
+                  : Colors.white.withAlpha(10),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: enabled
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.transparent,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: enabled
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.25),
+              size: 28,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _controlBtn({required IconData icon, required VoidCallback onTap}) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white.withAlpha(30),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: Colors.white, size: 28),
+        child: Icon(icon, color: Colors.white, size: 26),
       ),
     );
   }
@@ -673,6 +895,26 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     );
   }
 
+  Widget _buildLessonCounter() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+      ),
+      child: Text(
+        '${_currentIndex + 1} / ${_playlist.length}',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1,
+        ),
+      ),
+    );
+  }
+
   Widget _buildDecryptingIndicator() {
     return Container(
       color: Colors.black87,
@@ -680,15 +922,9 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: 1),
-              duration: const Duration(seconds: 1),
-              builder:
-                  (_, v, __) => CircularProgressIndicator(
-                    value: null,
-                    color: Theme.of(context).primaryColor,
-                    strokeWidth: 3,
-                  ),
+            CircularProgressIndicator(
+              color: Theme.of(context).primaryColor,
+              strokeWidth: 3,
             ),
             const SizedBox(height: 16),
             const Text(
@@ -714,6 +950,32 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     );
   }
 
+  Widget _buildTransitionIndicator() {
+    return Container(
+      color: Colors.black.withValues(alpha: 0.7),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              color: Theme.of(context).primaryColor,
+              strokeWidth: 3,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '⏭ جاري تحميل الدرس ${_currentIndex + 1}...',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontFamily: 'Cairo',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildInfoPanel(bool isDark, Color primaryColor) {
     return Container(
       decoration: BoxDecoration(
@@ -723,9 +985,9 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // ── عنوان الفيديو ───────────────────────────────────────────────
+          // ── عنوان الفيديو ────────────────────────────────────────────
           Text(
-            widget.videoTitle,
+            _currentTitle,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -735,7 +997,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
           ),
           const SizedBox(height: 6),
 
-          // ── شارة المصدر ─────────────────────────────────────────────────
+          // ── شارة المصدر ──────────────────────────────────────────────
           Row(
             children: [
               Icon(Icons.cloud_rounded, size: 14, color: Colors.grey.shade500),
@@ -748,12 +1010,12 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
           ),
           const SizedBox(height: 24),
 
-          // ── زر التحميل / الحالة ─────────────────────────────────────────
+          // ── زر التحميل / الحالة ──────────────────────────────────────
           _buildDownloadSection(primaryColor),
 
           const SizedBox(height: 24),
 
-          // ── بطاقة الأمان ────────────────────────────────────────────────
+          // ── بطاقة الأمان ─────────────────────────────────────────────
           _buildSecurityCard(isDark, primaryColor),
         ],
       ),
@@ -763,7 +1025,10 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   Widget _buildDownloadSection(Color primaryColor) {
     if (_isOfflineAvailable) {
       return FutureBuilder<String>(
-        future: VideoDownloadService.getFileSizeMB(widget.videoId, courseId: widget.courseId),
+        future: VideoDownloadService.getFileSizeMB(
+          _currentVideoId,
+          courseId: widget.courseId,
+        ),
         builder: (_, snap) {
           final size = snap.data ?? '...';
           return Container(
@@ -870,7 +1135,6 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
       );
     }
 
-    // زر التحميل
     return GestureDetector(
       onTap: _startDownload,
       child: Container(
