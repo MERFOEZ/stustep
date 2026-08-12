@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +6,7 @@ import '../../../core/services/housing_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../models/admission_enums.dart';
 import '../models/housing_model.dart';
+import '../models/upload_file.dart';
 import '../requirements/widgets/certificate_form_fields.dart';
 import '../widgets/admission_app_bar.dart';
 import 'widgets/housing_form_fields.dart';
@@ -39,7 +38,7 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
   HousingStatus _status = HousingStatus.available;
   HousingGender _gender = HousingGender.male;
 
-  final List<File> _images = [];
+  final List<UploadFile> _images = [];
   bool _isSaving = false;
   int _uploadedCount = 0;
 
@@ -60,21 +59,28 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
     super.dispose();
   }
 
+  /// اختيار الصور وقراءتها **بايتات لا مسارات**.
+  ///
+  /// مسار `XFile` على الويب رابط `blob:` لا يفهمه `dart:io`، بينما
+  /// `readAsBytes` يعمل على المنصات الثلاث. والضغط عند الاختيار لأن صورة
+  /// الهاتف الخام قد تتجاوز خمسة ميغابايت فيفشل رفع ست صور على اتصال ضعيف.
   Future<void> _pickImages() async {
     final remaining = StorageService.maxImageCount - _images.length;
     if (remaining <= 0) return;
 
-    // ضغط الصور قبل الرفع: اتصال الطالب غالباً محدود، وصورة الهاتف الخام
-    // قد تتجاوز خمسة ميغابايت فيفشل رفع ست صور كاملاً.
     final picked = await ImagePicker().pickMultiImage(
       imageQuality: 70,
       limit: remaining,
     );
-    if (picked.isEmpty || !mounted) return;
+    if (picked.isEmpty) return;
 
-    setState(() {
-      _images.addAll(picked.take(remaining).map((file) => File(file.path)));
-    });
+    final files = [
+      for (final file in picked.take(remaining))
+        UploadFile(name: file.name, bytes: await file.readAsBytes()),
+    ];
+
+    if (!mounted) return;
+    setState(() => _images.addAll(files));
   }
 
   double? _optionalNumber(TextEditingController controller) {
@@ -242,24 +248,21 @@ class _AddHousingScreenState extends State<AddHousingScreen> {
   Widget _buildNumbersRow() {
     return Row(
       children: [
-        Expanded(
-          child: HousingLabeledField(
-            label: 'admission.housing.price'.tr(),
-            icon: Icons.payments_outlined,
-            controller: _price,
-            keyboardType: TextInputType.number,
-          ),
-        ),
+        Expanded(child: _numberField('price', Icons.payments_outlined, _price)),
         const SizedBox(width: 12),
         Expanded(
-          child: HousingLabeledField(
-            label: 'admission.housing.rooms'.tr(),
-            icon: Icons.meeting_room_outlined,
-            controller: _rooms,
-            keyboardType: TextInputType.number,
-          ),
+          child: _numberField('rooms', Icons.meeting_room_outlined, _rooms),
         ),
       ],
+    );
+  }
+
+  Widget _numberField(String key, IconData icon, TextEditingController c) {
+    return HousingLabeledField(
+      label: 'admission.housing.$key'.tr(),
+      icon: icon,
+      controller: c,
+      keyboardType: TextInputType.number,
     );
   }
 

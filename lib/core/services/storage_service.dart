@@ -1,12 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../features/admission/models/upload_file.dart';
+
 /// خدمة رفع الملفات الخاصة بموديول القبول (صور السكنات وملفات النماذج).
 ///
-/// ملاحظتان تصميميتان:
+/// ثلاث ملاحظات تصميمية:
 ///
 /// 1) هذه الخدمة تكرّر منطق الرفع الموجود في `ChatService.uploadFile` **عمداً**.
 ///    إعادة تصنيع تلك الدالة تعني تعديل أنشط ملف في المشروع (ملف زميل)،
@@ -14,6 +15,10 @@ import 'package:http/http.dart' as http;
 ///
 /// 2) عزل الرفع خلف خدمة واحدة يجعل الانتقال مستقبلاً إلى Firebase Storage
 ///    تعديلاً في ملف واحد فقط، بلا مساس بأي شاشة.
+///
+/// 3) الخدمة ترفع **بايتات** لا `File` من `dart:io`، فتعمل كما هي على
+///    أندرويد و iOS والويب. الاعتماد على المسار كان يكسر الويب تماماً:
+///    `File(path)` هناك ترمي `UnsupportedError`.
 class StorageService {
   static final StorageService _instance = StorageService._internal();
 
@@ -30,10 +35,12 @@ class StorageService {
       Uri.parse('https://api.cloudinary.com/v1_1/$_cloudName/auto/upload');
 
   /// رفع ملف واحد وإرجاع رابطه الآمن.
-  Future<String> uploadFile(File file) async {
+  Future<String> uploadFile(UploadFile file) async {
     final request = http.MultipartRequest('POST', _uploadUri);
     request.fields['upload_preset'] = _uploadPreset;
-    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    request.files.add(
+      http.MultipartFile.fromBytes('file', file.bytes, filename: file.name),
+    );
 
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
@@ -52,16 +59,16 @@ class StorageService {
     return secureUrl;
   }
 
-  Future<String> uploadImage(File file) => uploadFile(file);
+  Future<String> uploadImage(UploadFile file) => uploadFile(file);
 
-  Future<String> uploadPdf(File file) => uploadFile(file);
+  Future<String> uploadPdf(UploadFile file) => uploadFile(file);
 
   /// رفع عدة ملفات بالتسلسل مع تقرير التقدّم.
   ///
   /// اخترنا الرفع بالتسلسل لا بالتوازي لأن اتصال الطالب غالباً محدود،
   /// والرفع المتوازي لعدة صور يرفع نسبة الفشل الكلي.
   Future<List<String>> uploadMultiple(
-    List<File> files, {
+    List<UploadFile> files, {
     void Function(int completed, int total)? onProgress,
   }) async {
     final urls = <String>[];

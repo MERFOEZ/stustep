@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../features/admission/models/admission_enums.dart';
 import '../../features/admission/models/housing_model.dart';
+import '../../features/admission/models/upload_file.dart';
 import 'admission_collections.dart';
 import 'auth_service.dart';
 import 'storage_service.dart';
@@ -97,7 +96,7 @@ class HousingService {
   /// المحاولة عليه المستخدم.
   Future<String?> create({
     required HousingModel housing,
-    List<File> images = const [],
+    List<UploadFile> images = const [],
     void Function(int completed, int total)? onUploadProgress,
   }) async {
     final user = AuthService().currentUser;
@@ -135,7 +134,7 @@ class HousingService {
   Future<bool> update({
     required String housingId,
     required HousingModel housing,
-    List<File> newImages = const [],
+    List<UploadFile> newImages = const [],
   }) async {
     try {
       final data = housing.toFirestore()

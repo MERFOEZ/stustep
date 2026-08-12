@@ -42,10 +42,14 @@ export PATH="/opt/fl/flutter/bin:$PATH" && flutter pub get
 
 ```bash
 export PATH="/opt/fl/flutter/bin:$PATH"
-flutter analyze                       # المتوقَّع: صفر أخطاء (14 ملاحظة info قديمة)
-flutter test --reporter=failures-only # المتوقَّع: 100/100 ناجح
-cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح
+flutter analyze                       # المتوقَّع: صفر أخطاء · 12 ملاحظة كلها في ملفات زملاء
+flutter test --reporter=failures-only # المتوقَّع: 119/119 ناجح
+cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح (يحتاج Java)
+flutter build web --release           # المتوقَّع: يبنى بنجاح (نشر Vercel)
 ```
+
+> ملفات الموديول نفسها **لا تُنتج أي ملاحظة تحليل**. أي ملاحظة جديدة فيها
+> تراجُع يجب إصلاحه، لا أمر عادي.
 
 ---
 
@@ -64,8 +68,11 @@ cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح
 | نماذج الاختبارات | `admission/exam_papers/` | ✅ |
 | مساعد التخصص + محاكي «ماذا لو؟» | `admission/matcher/` | ✅ |
 
-**الأرقام:** 65 ملفاً · 9,615 سطراً · 100 اختبار وحدة · 33 اختبار قواعد أمان
-· 243 مفتاح ترجمة × لغتين · صفر مجموعات Firestore قائمة عُدِّلت.
+**الأرقام:** 66 ملفاً · 9,644 سطراً · 119 اختباراً (95 منطق + 24 ودجت) ·
+33 اختبار قواعد أمان · 243 مفتاح ترجمة × لغتين · صفر مجموعات Firestore
+قائمة عُدِّلت.
+
+**كل المراحل موثّقة:** `docs/admission_phase_{1..8}_explanation.md`.
 
 ---
 
@@ -78,9 +85,14 @@ cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح
 4. **سقف 300 سطر لكل ملف.** أكبر ملف حالياً 297.
 5. **صفر نص مكتوب في الكود.** كل شيء عبر `easy_localization` تحت جذر
    `"admission"` في `assets/translations/{ar,en}.json`.
+   يحرس هذا اختبار `expectNoRawTranslationKeys()` في اختبارات الودجت.
 6. **التعدادات تُخزَّن نصاً لا رقماً** (`'yemeni_general'` لا `0`).
 7. **مجموعات الظل:** معرّف الوثيقة = معرّف الأصل
    (`department_guides/{departmentId}`)، ولا تُعدَّل مجموعات الزملاء.
+
+8. **صفر `dart:io` في الموديول.** التطبيق يُنشر على الويب أيضاً، و`File`
+   هناك ترمي `UnsupportedError`. الملفات تُمرَّر كـ`UploadFile`
+   (اسم + بايتات) والمعاينة بـ`MemoryImage` لا `FileImage`.
 
 ### ⛔ ملفات ممنوع تعديلها (شغل زملاء أو حساسة)
 
@@ -113,6 +125,7 @@ lib/core/theme/ · lib/main.dart · lib/firebase_options.dart
 | شرح كل مرحلة | `docs/admission_phase_{1,2,3,4}_explanation.md` |
 | قواعد الأمان + كيف تُنشر | `firestore.rules` |
 | بيانات أولية (5 كليات · 15 تخصصاً) | `assets/seed/admission_seed.json` |
+| مُهيّئ اختبارات الودجت بالترجمات الحقيقية | `test/admission/support/localized_pump.dart` |
 
 ---
 

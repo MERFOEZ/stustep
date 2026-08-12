@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/services/storage_service.dart';
+import '../../models/upload_file.dart';
 import '../../requirements/widgets/certificate_form_fields.dart';
 
 /// حقل نصي موحّد لنموذج السكن.
@@ -89,7 +88,7 @@ class HousingLabeledField extends StatelessWidget {
 /// الحد الأقصى يأتي من `StorageService.maxImageCount` لا من رقم مكتوب هنا،
 /// حتى تبقى قيمة واحدة تحكم الواجهة والرفع معاً.
 class HousingImagesPicker extends StatelessWidget {
-  final List<File> images;
+  final List<UploadFile> images;
   final VoidCallback onAdd;
   final ValueChanged<int> onRemove;
 
@@ -152,7 +151,12 @@ class HousingImagesPicker extends StatelessWidget {
     );
   }
 
-  Widget _buildImageTile(int index, File file) {
+  /// المعاينة من الذاكرة لا من المسار.
+  ///
+  /// `FileImage` يعتمد على `dart:io` فلا يعمل على الويب إطلاقاً، بينما
+  /// `MemoryImage` يقرأ البايتات نفسها التي ستُرفع فعلاً — فما يراه
+  /// المستخدم في المعاينة هو بعينه ما يصل إلى الخادم.
+  Widget _buildImageTile(int index, UploadFile file) {
     return Stack(
       children: [
         Container(
@@ -160,7 +164,10 @@ class HousingImagesPicker extends StatelessWidget {
           margin: const EdgeInsets.only(right: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            image: DecorationImage(image: FileImage(file), fit: BoxFit.cover),
+            image: DecorationImage(
+              image: MemoryImage(file.bytes),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         Positioned(

@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../features/admission/models/admission_enums.dart';
 import '../../features/admission/models/exam_paper_model.dart';
+import '../../features/admission/models/upload_file.dart';
 import 'admission_collections.dart';
 import 'auth_service.dart';
 import 'storage_service.dart';
@@ -90,13 +89,13 @@ class ExamPaperService {
   /// إن فشل الرفع، وهي أسوأ من فشل واضح يُعيد المستخدم المحاولة عليه.
   Future<String?> upload({
     required ExamPaperModel paper,
-    required File file,
+    required UploadFile file,
   }) async {
     final user = AuthService().currentUser;
     if (user == null) return null;
 
     try {
-      final fileSize = await file.length();
+      final fileSize = file.sizeBytes;
       if (fileSize > maxFileSizeBytes) {
         debugPrint('ExamPaperService: file too large ($fileSize bytes)');
         return null;
