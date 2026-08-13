@@ -1,7 +1,11 @@
 import 'dart:io';
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../core/services/video_encryption_service.dart';
 import '../../core/services/video_download_service.dart';
 
@@ -23,12 +27,16 @@ class SecureVideoPlayerScreen extends StatefulWidget {
   /// تدرج ألوان يُستخدم في شريط العنوان
   final Gradient? gradient;
 
+  /// Callback يُستدعى عند انتهاء الفيديو (أو بعد انتهاء الإعلان) للتشغيل التلقائي للفيديو التالي
+  final VoidCallback? onAdFinished;
+
   const SecureVideoPlayerScreen({
     super.key,
     required this.videoTitle,
     required this.videoId,
     required this.onlineUrl,
     this.gradient,
+    this.onAdFinished,
   });
 
   @override
@@ -67,6 +75,14 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   late AnimationController _playPulseController;
   late Animation<double> _playPulseAnim;
 
+  // ─── AdMob - Warrior's Rest (Pre-Roll) ──────────────────────────────────
+  NativeAd? _nativeAd;
+  bool _isAdLoaded = false;
+  bool _isAdBreakActive = false;
+  bool _adBreakFinished = false; // Indicates the pre-roll phase is over
+  bool _isVideoAllowedToPlay = false; // True when ad finishes or fails
+  Timer? _adTimer;
+
   @override
   void initState() {
     super.initState();
@@ -82,7 +98,77 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     _playPulseAnim = Tween<double>(begin: 1.0, end: 1.3).animate(
       CurvedAnimation(parent: _playPulseController, curve: Curves.easeOut),
     );
-    _initialize();
+    _startPreRollFlow();
+  }
+
+  Future<void> _startPreRollFlow() async {
+    final offline = await VideoDownloadService.isDownloaded(widget.videoId);
+    if (mounted) {
+      setState(() => _isOfflineAvailable = offline);
+    }
+
+    bool isOnline = true;
+    try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      isOnline = !connectivityResult.contains(ConnectivityResult.none);
+    } catch (_) {}
+
+    // If offline or playing offline version, skip ad
+    if (!isOnline || offline) {
+      _adBreakFinished = true;
+      _isVideoAllowedToPlay = true;
+    } else {
+      // Start Ad Load and a timeout
+      _loadNativeAd();
+      
+      // 3-second timeout for the Ad to load
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted && !_isAdBreakActive && !_adBreakFinished) {
+          debugPrint('AdMob: Ad load timeout reached. Playing video.');
+          _showSnack('⚠️ الإعلان أخذ وقتاً طويلاً (تجاوز 3 ثوانٍ)، تم التخطي');
+          _finishAdBreakAndPlayVideo();
+        }
+      });
+    }
+
+    await _initPlayer(offline);
+  }
+
+  void _loadNativeAd() {
+    _nativeAd = NativeAd(
+      // IMPORTANT: Use Google's official Test Ad Unit ID for development.
+      // Replace with your real ID later: ca-app-pub-6790626532501505/2239060188
+      adUnitId: 'ca-app-pub-3940256099942544/2247696110', // Native Advanced Test ID
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          debugPrint('AdMob: Native Ad Loaded Successfully!');
+          if (mounted && !_adBreakFinished) {
+            setState(() {
+              _isAdLoaded = true;
+              _isAdBreakActive = true;
+            });
+            // Show ad for 5 seconds then play video
+            _adTimer = Timer(const Duration(seconds: 5), () {
+              if (mounted) _finishAdBreakAndPlayVideo();
+            });
+          } else {
+            ad.dispose(); // Dispose if loaded after timeout
+          }
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('AdMob: Native Ad Failed to Load: $error');
+          ad.dispose();
+          if (mounted && !_adBreakFinished) {
+            _showSnack('❌ فشل تحميل الإعلان: ${error.message}');
+            _finishAdBreakAndPlayVideo();
+          }
+        },
+      ),
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.medium,
+      ),
+    )..load();
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -90,11 +176,7 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
   // ════════════════════════════════════════════════════════════════════════
 
   Future<void> _initialize() async {
-    final offline = await VideoDownloadService.isDownloaded(widget.videoId);
-    if (mounted) {
-      setState(() => _isOfflineAvailable = offline);
-    }
-    await _initPlayer(offline);
+    // Moved to _startPreRollFlow
   }
 
   Future<void> _initPlayer(bool useOffline) async {
@@ -141,10 +223,11 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
         _duration = controller.value.duration;
       });
 
-      // تشغيل تلقائي
-      await controller.play();
-      setState(() => _isPlaying = true);
-      _scheduleHideControls();
+      if (_isVideoAllowedToPlay) {
+        await controller.play();
+        setState(() => _isPlaying = true);
+        _scheduleHideControls();
+      }
     } catch (e) {
       setState(() {
         _hasError = true;
@@ -162,6 +245,32 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
       _duration = value.duration;
       _isPlaying = value.isPlaying;
     });
+
+    // Check if video finished to trigger onAdFinished callback
+    if (_duration.inMilliseconds > 0 && 
+        _position >= _duration) {
+      // If we already played the ad at the start, just call the finish callback at the end
+      widget.onAdFinished?.call();
+    }
+  }
+
+  void _finishAdBreakAndPlayVideo() {
+    if (_adBreakFinished) return;
+    setState(() {
+      _isAdBreakActive = false;
+      _adBreakFinished = true;
+      _isVideoAllowedToPlay = true;
+    });
+    
+    _adTimer?.cancel();
+    _nativeAd?.dispose();
+    _nativeAd = null;
+
+    if (_isInitialized && _controller != null) {
+      _controller!.play();
+      setState(() => _isPlaying = true);
+      _scheduleHideControls();
+    }
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -292,6 +401,8 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
     _controller?.dispose();
     _controlsFadeController.dispose();
     _playPulseController.dispose();
+    _adTimer?.cancel();
+    _nativeAd?.dispose();
 
     // ← الإتلاف التلقائي: مسح الملف المؤقت المفكوك فوراً
     if (_tempFilePath != null) {
@@ -468,7 +579,45 @@ class _SecureVideoPlayerScreenState extends State<SecureVideoPlayerScreen>
       );
     }
 
-    return VideoPlayer(_controller!);
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: VideoPlayer(_controller!),
+        ),
+        // AdMob Overlay (Warrior's Rest)
+        if (_isAdBreakActive && _nativeAd != null)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.6),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+                child: Center(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: 350, // Strict height for Native Template
+                    constraints: const BoxConstraints(
+                      maxWidth: 400,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 20,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: AdWidget(ad: _nativeAd!),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   Widget _buildControlsOverlay(Color primaryColor) {
