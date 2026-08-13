@@ -1,7 +1,12 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
 import '../../models/subject_catalog.dart';
+
+// ⚠️ `dart:ui` باسم مستعار: حزمة easy_localization تصدّر تعداداً آخر اسمه
+// `TextDirection` أيضاً، فنكتب `ui.TextDirection.ltr` صراحةً لفض التعارض.
 
 /// حقول إدخال درجات المواد بالنسبة المئوية.
 ///
@@ -68,7 +73,7 @@ class SubjectGradesField extends StatelessWidget {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    textDirection: TextDirection.ltr,
+                    textDirection: ui.TextDirection.ltr,
                     textAlign: TextAlign.center,
                     validator: _validateGrade,
                     decoration: InputDecoration(
