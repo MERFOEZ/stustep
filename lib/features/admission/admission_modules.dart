@@ -4,9 +4,10 @@ import 'exam_papers/papers_colleges_screen.dart';
 import 'guide/guide_colleges_screen.dart';
 import 'housing/housing_list_screen.dart';
 import 'matcher/matcher_intro_screen.dart';
+import 'portal/university_portal_screen.dart';
 import 'requirements/requirements_colleges_screen.dart';
 
-/// تعريف الأقسام الخمسة لموديول القبول.
+/// تعريف أقسام موديول القبول الستة.
 ///
 /// لماذا ملف تعريف مستقل بدل كتابة البطاقات داخل شاشة الـ Hub؟
 /// لأن كل مرحلة قادمة (3 إلى 7) ستربط شاشتها بتغيير **سطر واحد** هنا فقط:
@@ -47,6 +48,8 @@ Widget _housingBuilder(BuildContext context) => const HousingListScreen();
 
 Widget _examPapersBuilder(BuildContext context) =>
     const PapersCollegesScreen();
+
+Widget _portalBuilder(BuildContext context) => const UniversityPortalScreen();
 
 /// قائمة الأقسام بترتيب العرض في شاشة الـ Hub.
 class AdmissionModules {
@@ -97,6 +100,17 @@ class AdmissionModules {
         colors: [Color(0xFFC51162), Color(0xFFFF4081)],
       ),
       builder: _matcherBuilder,
+    ),
+    // آخر البطاقات عمداً: كل ما قبلها يجيب أسئلة الطالب داخل التطبيق، وهذه
+    // تنقله إلى موقع الجامعة — وهي خطوته الأخيرة بعد أن يعرف ماذا يريد.
+    AdmissionModuleEntry(
+      labelKey: 'admission.modules.portal.title',
+      descriptionKey: 'admission.modules.portal.desc',
+      icon: Icons.launch_rounded,
+      gradient: LinearGradient(
+        colors: [Color(0xFF00838F), Color(0xFF26C6DA)],
+      ),
+      builder: _portalBuilder,
     ),
   ];
 }
