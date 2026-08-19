@@ -4,12 +4,17 @@ import 'package:animate_do/animate_do.dart';
 import '../../core/theme/app_theme.dart';
 import '../admission/admission_hub_screen.dart';
 import 'service_detail_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final String defaultName = context.locale.languageCode == 'ar' ? 'طالب' : 'Student';
+    final userName = user?.displayName?.split(' ').first ?? defaultName;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -89,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'welcome_back'.tr(),
+                              'welcome_back'.tr(args: [userName]),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,

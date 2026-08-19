@@ -19,7 +19,7 @@
     "marketplace": "المتجر",
     "scholarship_radar": "رادار المنح",
     "no_downloads": "لا توجد تنزيلات بعد",
-    "welcome_back": "مرحباً بك يا طالب!",
+    "welcome_back": "مرحباً بك يا {}!",
     "select_model": "اختر نموذج الذكاء الاصطناعي",
     "model_deepseek": "ديب سيك R1",
     "model_gemini": "جميناي 1.5 برو",

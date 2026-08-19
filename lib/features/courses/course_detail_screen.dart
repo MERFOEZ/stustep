@@ -6,6 +6,9 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import '../../core/services/video_download_service.dart';
 import '../../core/services/video_encryption_service.dart';
+import 'dart:async';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final String courseId;
@@ -35,6 +38,13 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   // Track download states: 'downloaded', 'not_downloaded', or double representing progress
   final Map<String, dynamic> _downloadStatus = {};
   String? _currentTempFile;
+
+  // AdMob State
+  NativeAd? _nativeAd;
+  bool _isAdLoading = false;
+  bool _isAdShowing = false;
+  bool _canSkipAd = false;
+  Timer? _skipTimer;
 
   @override
   void initState() {
@@ -137,17 +147,17 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   Future<void> _playVideo(int index) async {
     if (_selectedLectureIndex == index) return;
     
+    // Reset ad state and controllers when switching videos
+    _cleanupAd();
+    await _cleanupPlayer();
+
     setState(() {
       _selectedLectureIndex = index;
     });
 
-    await _cleanupPlayer();
-
     final lesson = widget.lectures[index] as Map<String, dynamic>;
     final videoUrl = lesson['url']?.toString() ?? '';
     final videoId = _getVideoId(index);
-
-    print('=== VIDEO_URL_DEBUG: $videoUrl ===');
 
     if (videoUrl.isEmpty || !videoUrl.startsWith('http')) {
       if (mounted) {
@@ -156,8 +166,90 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       return;
     }
 
+    final isDownloaded = await VideoDownloadService.isDownloaded(videoId);
+
+    bool isOnline = true;
     try {
-      final isDownloaded = await VideoDownloadService.isDownloaded(videoId);
+      final connectivityResult = await Connectivity().checkConnectivity();
+      isOnline = !connectivityResult.contains(ConnectivityResult.none);
+    } catch (_) {}
+
+    // If offline or downloaded, play directly. Otherwise, show Ad!
+    if (!isOnline || isDownloaded) {
+      await _initializeAndPlayVideo(videoUrl, videoId, isDownloaded);
+    } else {
+      _loadAndShowAd(videoUrl, videoId, isDownloaded);
+    }
+  }
+
+  void _loadAndShowAd(String videoUrl, String videoId, bool isDownloaded) {
+    setState(() {
+      _isAdLoading = true;
+      _isAdShowing = false;
+      _canSkipAd = false;
+    });
+
+    _nativeAd = NativeAd(
+      adUnitId: 'ca-app-pub-3940256099942544/2247696110', // Test ID
+      factoryId: 'adFactoryExample', // fallback if template is ignored
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.medium,
+        mainBackgroundColor: Colors.black,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          if (mounted) {
+            setState(() {
+              _isAdLoading = false;
+              _isAdShowing = true;
+            });
+            // Show skip button after 5 seconds
+            _skipTimer = Timer(const Duration(seconds: 5), () {
+              if (mounted) setState(() => _canSkipAd = true);
+            });
+          }
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('AdMob Failed: $error');
+          ad.dispose();
+          if (mounted && _isAdLoading) {
+             _cleanupAd();
+             _initializeAndPlayVideo(videoUrl, videoId, isDownloaded);
+          }
+        },
+      ),
+      request: const AdRequest(),
+    )..load();
+
+    // Timeout: if ad doesn't load in 3s, skip it.
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted && _isAdLoading) {
+        debugPrint('AdMob: Timeout loading ad');
+        _cleanupAd();
+        _initializeAndPlayVideo(videoUrl, videoId, isDownloaded);
+      }
+    });
+  }
+
+  void _cleanupAd() {
+    _skipTimer?.cancel();
+    _nativeAd?.dispose();
+    _nativeAd = null;
+    if (mounted) {
+      setState(() {
+        _isAdLoading = false;
+        _isAdShowing = false;
+        _canSkipAd = false;
+      });
+    }
+  }
+
+  Future<void> _initializeAndPlayVideo(String videoUrl, String videoId, bool isDownloaded) async {
+    try {
       if (isDownloaded) {
         final encPath = await VideoEncryptionService.getEncFilePath(videoId);
         _currentTempFile = await VideoEncryptionService.decryptToTemp(
@@ -202,7 +294,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         });
       }
     } catch (e) {
-      print('=== VIDEO_INIT_ERROR: $e ===');
       debugPrint("Error initializing video: $e");
     }
   }
@@ -276,6 +367,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   @override
   void dispose() {
+    _cleanupAd();
     _cleanupPlayer();
     super.dispose();
   }
@@ -336,6 +428,42 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     ),
                   ],
                 ),
+              )
+            else if (_isAdLoading)
+              const Center(child: CircularProgressIndicator(color: Colors.white))
+            else if (_isAdShowing && _nativeAd != null)
+              Stack(
+                children: [
+                   Container(
+                     color: Colors.white,
+                     child: AdWidget(ad: _nativeAd!),
+                   ),
+                   if (_canSkipAd)
+                     Positioned(
+                       bottom: 16,
+                       right: 16,
+                       child: ElevatedButton.icon(
+                         onPressed: () {
+                           final lesson = widget.lectures[_selectedLectureIndex!] as Map<String, dynamic>;
+                           final videoId = _getVideoId(_selectedLectureIndex!);
+                           _cleanupAd();
+                           _initializeAndPlayVideo(lesson['url'] ?? '', videoId, false);
+                         },
+                         icon: const Icon(Icons.skip_next_rounded),
+                         label: const Text(
+                           "تخطي الإعلان", 
+                           style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Cairo')
+                         ),
+                         style: ElevatedButton.styleFrom(
+                           backgroundColor: Colors.white.withValues(alpha: 0.9), 
+                           foregroundColor: Colors.black,
+                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                           elevation: 4,
+                         ),
+                       ),
+                     ),
+                ],
               )
             else if (_chewieController != null && _chewieController!.videoPlayerController.value.isInitialized)
               Chewie(controller: _chewieController!)
