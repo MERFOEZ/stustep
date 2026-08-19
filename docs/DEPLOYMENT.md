@@ -58,21 +58,31 @@ firebase deploy --only hosting,firestore:rules
 
 ---
 
-## الخيار الثاني — Vercel
+## الخيار الثاني — Vercel (نشر تلقائي من GitHub)
 
-Vercel لا يبني Flutter بنفسه، فتبني محلياً وترفع الناتج الجاهز.
+Vercel لا يعرف Flutter، فكان النشر سابقاً يدوياً: تبني محلياً وترفع الناتج.
+ولمّا رُبط المستودع بـ Vercel عبر GitHub لم يكن هناك أمر بناء، ومجلد
+`build/web` مستثنى في `.gitignore` — فخرج المستودع بلا مخرجات ورد الموقع
+`404: NOT_FOUND`.
 
-```bash
-# مرة واحدة
-npm install -g vercel
-vercel login
+الحل: `vercel.json` صار يحمل أمر بناء صريح يجلب Flutter ثم يبني:
 
-# في كل نشر
-flutter build web --release
-vercel --prod
+```json
+"buildCommand": "bash scripts/vercel_build.sh"
 ```
 
-الإعداد جاهز في `vercel.json`: يوجّه كل المسارات إلى `index.html` (لأن
+فلا حاجة لأي خطوة يدوية بعد الآن: **كل دفعة إلى GitHub تُنتج نشرة جديدة**
+تلقائياً — الدفع إلى `main` يحدّث الرابط الأساسي، وأي فرع آخر يعطي رابط
+معاينة مستقلاً.
+
+`scripts/vercel_build.sh` يثبّت Flutter **3.38.5** بالتحديد، لأن Dart بداخله
+(3.10.4) هو ما يحقّق قيد `pubspec.yaml`. ويبني بخيار
+`--no-web-resources-cdn` ليُستضاف CanvasKit من نطاقك بدل `gstatic.com`،
+فلا يعتمد إقلاع التطبيق على تحميل خارجي.
+
+> أول بناء يستغرق نحو ٥–١٠ دقائق لأنه ينزّل Flutter SDK كاملاً.
+
+باقي إعداد `vercel.json` كما كان: يوجّه كل المسارات إلى `index.html` (لأن
 التنقّل داخل Flutter لا عبر الخادم)، ويضبط التخزين المؤقت.
 
 ### 🔴 خطوة إلزامية بعد أول نشر على Vercel
