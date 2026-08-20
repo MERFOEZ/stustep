@@ -18,7 +18,8 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="StuStep - Academic Assistant">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -31,8 +32,32 @@
 
   <title>stustep</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- شاشة تحميل مبدئية تظهر فوراً قبل إقلاع Flutter لتجنّب الشاشة البيضاء -->
+  <style>
+    body{margin:0;background:linear-gradient(135deg,#6200EE,#9C27B0,#E91E63);display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif}
+    .loader{text-align:center;color:#fff}
+    .loader .icon{width:100px;height:100px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 32px rgba(0,0,0,.2);font-size:48px}
+    .loader h1{font-size:36px;letter-spacing:2px;margin:0 0 8px}
+    .loader p{opacity:.8;font-size:14px;margin:0 0 32px}
+    .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
 </head>
 <body>
+  <div class="loader" id="preloader">
+    <div class="icon">🎓</div>
+    <h1>stustep</h1>
+    <p>Academic Assistant</p>
+    <div class="spinner"></div>
+  </div>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // إخفاء شاشة التحميل فور رسم أول إطار من Flutter
+    window.addEventListener('flutter-first-frame', function() {
+      var el = document.getElementById('preloader');
+      if (el) el.remove();
+    });
+  </script>
 </body>
 </html>
