@@ -19,7 +19,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   _navigateToHome() async {
-    await Future.delayed(const Duration(milliseconds: 3500), () {});
+    // تأخير قصير يكفي لعرض الشعار دون إبطاء التطبيق
+    await Future.delayed(const Duration(milliseconds: 1500), () {});
     if (mounted) {
       final user = FirebaseAuth.instance.currentUser;
       final nextScreen = user != null ? const MainScaffold() : const LoginScreen();

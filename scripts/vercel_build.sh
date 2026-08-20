@@ -20,6 +20,6 @@ git config --global --add safe.directory "${FLUTTER_DIR}" || true
 flutter --version
 flutter pub get
 
-# ‏--no-web-resources-cdn: نستضيف CanvasKit من نفس النطاق بدل gstatic،
-# فلا يبقى التطبيق رهينة تحميل خارجي قد يُحجب أو يبطؤ.
-flutter build web --release --no-web-resources-cdn
+# ‏--wasm: تنتج ملفات أصغر وتشتغل أسرع من JavaScript في المتصفحات الحديثة
+# ‏--no-web-resources-cdn: نستضيف CanvasKit من نفس النطاق بدل gstatic
+flutter build web --release --wasm --no-web-resources-cdn
