@@ -70,29 +70,33 @@ class AuthService {
     }
   }
 
-  // Sign in with Google
+  // تسجيل الدخول عبر Google — على الويب نستخدم signInWithPopup مباشرة
+  // لأن google_sign_in_web لا يدعم authenticate() ويرمي UnimplementedError
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-      await googleSignIn.initialize();
-      
-      final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
+      final UserCredential userCredential;
 
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      if (kIsWeb) {
+        // على الويب: Firebase Auth يتولى OAuth كاملاً عبر نافذة منبثقة
+        final googleProvider = GoogleAuthProvider();
+        userCredential = await _auth.signInWithPopup(googleProvider);
+      } else {
+        // على الموبايل: المسار المعتاد عبر google_sign_in SDK
+        final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+        await googleSignIn.initialize();
+        final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+        final OAuthCredential credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+        userCredential = await _auth.signInWithCredential(credential);
+      }
 
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
-
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
       final User? user = userCredential.user;
-
       if (user != null) {
-        // Check if user already exists in Firestore 'users' collection
         try {
           final userDoc = await _firestore.collection('users').doc(user.uid).get();
           if (!userDoc.exists) {
-            // Create a new user document
             await _firestore.collection('users').doc(user.uid).set({
               'uid': user.uid,
               'name': user.displayName ?? 'Student',
@@ -107,19 +111,25 @@ class AuthService {
 
       return userCredential;
     } catch (e) {
-      // Return null if canceled or throw error if it is not user canceling
       final errStr = e.toString().toLowerCase();
-      if (errStr.contains('canceled') || errStr.contains('sign_in_canceled') || errStr.contains('abort')) {
+      if (errStr.contains('canceled') ||
+          errStr.contains('sign_in_canceled') ||
+          errStr.contains('abort') ||
+          errStr.contains('popup-closed-by-user') ||
+          errStr.contains('popup_closed_by_user')) {
         return null;
       }
       rethrow;
     }
   }
 
-  // Sign out
+  // تسجيل الخروج — على الويب لا حاجة لاستدعاء GoogleSignIn.signOut
+  // لأننا استخدمنا signInWithPopup من Firebase مباشرة
   Future<void> signOut() async {
     await _auth.signOut();
-    await GoogleSignIn.instance.signOut();
+    if (!kIsWeb) {
+      await GoogleSignIn.instance.signOut();
+    }
   }
 
   // Fetch user data from Firestore
