@@ -42,8 +42,8 @@ export PATH="/opt/fl/flutter/bin:$PATH" && flutter pub get
 
 ```bash
 export PATH="/opt/fl/flutter/bin:$PATH"
-flutter analyze                       # المتوقَّع: صفر أخطاء · 12 ملاحظة كلها في ملفات زملاء
-flutter test --reporter=failures-only # المتوقَّع: 119/119 ناجح
+flutter analyze                       # المتوقَّع: صفر أخطاء · 13 ملاحظة كلها في ملفات زملاء
+flutter test --reporter=failures-only # المتوقَّع: 145/145 ناجح
 cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح (يحتاج Java)
 flutter build web --release           # المتوقَّع: يبنى بنجاح (نشر Vercel)
 ```
@@ -58,7 +58,7 @@ flutter build web --release           # المتوقَّع: يبنى بنجاح 
 تطبيق طلابي **جماعي** بـ Flutter + Firebase، أربعة مساهمين آخرين.
 **عمل Ahmad Hisham** هو موديول القبول الجامعي في `lib/features/admission/`.
 
-### حالة الموديول: ✅ مكتمل — المراحل 0 إلى 8
+### حالة الموديول: ✅ مكتمل — المراحل 0 إلى 9
 
 | القسم | المسار | الحالة |
 |---|---|---|
@@ -67,12 +67,13 @@ flutter build web --release           # المتوقَّع: يبنى بنجاح 
 | السكنات الطلابية | `admission/housing/` | ✅ |
 | نماذج الاختبارات | `admission/exam_papers/` | ✅ |
 | مساعد التخصص + محاكي «ماذا لو؟» | `admission/matcher/` | ✅ |
+| بوابة الجامعة الرسمية (روابط خارجية) | `admission/portal/` | ✅ |
 
-**الأرقام:** 66 ملفاً · 9,644 سطراً · 119 اختباراً (95 منطق + 24 ودجت) ·
-33 اختبار قواعد أمان · 243 مفتاح ترجمة × لغتين · صفر مجموعات Firestore
+**الأرقام:** 69 ملفاً · 10,083 سطراً · 145 اختباراً (115 منطق + 30 ودجت) ·
+33 اختبار قواعد أمان · 257 مفتاح ترجمة × لغتين · صفر مجموعات Firestore
 قائمة عُدِّلت.
 
-**كل المراحل موثّقة:** `docs/admission_phase_{1..8}_explanation.md`.
+**كل المراحل موثّقة:** `docs/admission_phase_{1..9}_explanation.md`.
 
 ---
 
@@ -122,7 +123,7 @@ lib/core/theme/ · lib/main.dart · lib/firebase_options.dart
 | الصورة الكاملة للمشروع والمناقشة | `docs/FINAL_PROJECT_DOCUMENTATION.md` |
 | المتبقي والمهام القادمة | `docs/NEXT_STEPS.md` |
 | تحليل المشروع الأصلي والمخاطر | `docs/admission_project_analysis.md` |
-| شرح كل مرحلة | `docs/admission_phase_{1,2,3,4}_explanation.md` |
+| شرح كل مرحلة | `docs/admission_phase_{1..9}_explanation.md` |
 | قواعد الأمان + كيف تُنشر | `firestore.rules` |
 | بيانات أولية (5 كليات · 15 تخصصاً) | `assets/seed/admission_seed.json` |
 | مُهيّئ اختبارات الودجت بالترجمات الحقيقية | `test/admission/support/localized_pump.dart` |

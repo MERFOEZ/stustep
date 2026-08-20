@@ -17,7 +17,9 @@ import 'package:stustep/features/admission/models/housing_model.dart';
 import 'package:stustep/features/admission/models/interest_tag.dart';
 import 'package:stustep/features/admission/models/major_suggestion.dart';
 import 'package:stustep/features/admission/models/matcher_outcome.dart';
+import 'package:stustep/features/admission/models/university_portal_link.dart';
 import 'package:stustep/features/admission/models/upload_file.dart';
+import 'package:stustep/features/admission/portal/widgets/university_link_tile.dart';
 import 'package:stustep/features/admission/requirements/widgets/eligibility_banner.dart';
 import 'package:stustep/features/admission/widgets/admission_gradient_card.dart';
 import 'package:stustep/features/admission/widgets/admission_state_views.dart';
@@ -414,6 +416,118 @@ void main() {
 
       expect(decoration.image!.image, isA<MemoryImage>());
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  // ===================== بوابة الجامعة الرسمية =====================
+
+  group('UniversityLinkTile — بطاقة الرابط الرسمي', () {
+    UniversityPortalLink link(UniversityLinkKind kind, String url) =>
+        UniversityPortalLink(
+          kind: kind,
+          uri: UniversityPortalLink.parseSafeUrl(url)!,
+        );
+
+    testWidgets('تعرض عنوان الرابط ووصفه مترجَمين لا كمفاتيح خام', (
+      tester,
+    ) async {
+      await pumpLocalized(
+        tester,
+        UniversityLinkTile(
+          link: link(
+            UniversityLinkKind.admissionPortal,
+            'https://apply.edu.ye',
+          ),
+          onTap: _noop,
+        ),
+      );
+
+      expect(find.text('بوابة التقديم الإلكتروني'), findsOneWidget);
+      expectNoRawTranslationKeys();
+    });
+
+    testWidgets('تعرض المضيف كما هو — هو ما يتحقق منه الطالب قبل الخروج', (
+      tester,
+    ) async {
+      await pumpLocalized(
+        tester,
+        UniversityLinkTile(
+          link: link(
+            UniversityLinkKind.feesPayment,
+            'https://www.apply.edu.ye/fees?year=2026',
+          ),
+          onTap: _noop,
+        ),
+      );
+
+      // المضيف بلا `www.` وبلا المسار: قصّة العنوان لا تُقرأ، والمضيف وحده
+      // هو ما يميّز الموقع الرسمي من المنتحِل.
+      expect(find.text('apply.edu.ye'), findsOneWidget);
+    });
+
+    testWidgets('تحمل أيقونة مغادرة التطبيق', (tester) async {
+      await pumpLocalized(
+        tester,
+        UniversityLinkTile(
+          link: link(UniversityLinkKind.website, 'https://edu.ye'),
+          onTap: _noop,
+        ),
+      );
+
+      expect(find.byIcon(Icons.open_in_new_rounded), findsOneWidget);
+    });
+
+    testWidgets('الضغط يستدعي onTap مرة واحدة', (tester) async {
+      var taps = 0;
+      await pumpLocalized(
+        tester,
+        UniversityLinkTile(
+          link: link(UniversityLinkKind.results, 'https://results.edu.ye'),
+          onTap: () => taps++,
+        ),
+      );
+
+      // نفس نهج بطاقة القسم أعلاه: نستدعي `onTap` من الودجت لا بضغطة
+      // إحداثيات، لأن `animate_do` تحرّك البطاقة أثناء الرسم.
+      tester.widget<InkWell>(find.byType(InkWell).first).onTap!();
+
+      expect(taps, 1);
+    });
+
+    testWidgets('الأنواع الأربعة كلها تُرسم بترجماتها بلا استثناء', (
+      tester,
+    ) async {
+      // حارس ضد إضافة نوع جديد للتعداد وننسى مفاتيح ترجمته: الاختبار يمرّ
+      // على `values` لا على قائمة مكتوبة يدوياً.
+      for (final kind in UniversityLinkKind.values) {
+        await pumpLocalized(
+          tester,
+          UniversityLinkTile(
+            link: link(kind, 'https://edu.ye'),
+            onTap: _noop,
+          ),
+        );
+
+        expectNoRawTranslationKeys();
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('بالإنجليزية تتغيّر النصوص ويبقى المضيف كما هو', (
+      tester,
+    ) async {
+      await pumpLocalized(
+        tester,
+        UniversityLinkTile(
+          link: link(UniversityLinkKind.website, 'https://www.edu.ye'),
+          onTap: _noop,
+        ),
+        locale: const Locale('en'),
+      );
+
+      // النص المكتوب داخل الكود لا يتغيّر بتغيّر اللغة — وهذا ما يكشفه.
+      expect(find.text('Official Website'), findsOneWidget);
+      expect(find.text('edu.ye'), findsOneWidget);
     });
   });
 }
