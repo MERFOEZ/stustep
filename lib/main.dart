@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -15,7 +16,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await MobileAds.instance.initialize();
+  // إعلانات AdMob لا تدعم الويب إطلاقاً، واستدعاء التهيئة هناك يرمي
+  // MissingPluginException قبل runApp فتظهر صفحة بيضاء فارغة.
+  // نتخطّاها على الويب وحده؛ سلوك أندرويد وiOS لم يتغيّر.
+  if (!kIsWeb) {
+    await MobileAds.instance.initialize();
+  }
   await EasyLocalization.ensureInitialized();
   try {
     await Hive.initFlutter();
