@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "description": "StuStep SAIE Knowledge Base — Questions Index",
+  "question_banks": [
+    "onboarding_questions.json",
+    "exploration_questions.json",
+    "deepening_computing.json",
+    "deepening_medicine.json",
+    "deepening_business.json"
+  ]
+}

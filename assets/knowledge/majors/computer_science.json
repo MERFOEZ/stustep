@@ -1,0 +1,45 @@
+{
+  "id": "major_computer_science",
+  "name": "Computer Science",
+  "name_ar": "علوم الحاسوب",
+  "description": "Study of computation, algorithms, data structures, programming languages, operating systems, artificial intelligence, and software engineering principles.",
+  "category": "computingAndTechnology",
+  "required_skill_ids": [
+    "skill_logical_reasoning",
+    "skill_mathematics",
+    "skill_problem_solving",
+    "skill_programming_fundamentals"
+  ],
+  "preferred_skill_ids": [
+    "skill_algorithms",
+    "skill_data_structures",
+    "skill_discrete_math",
+    "skill_teamwork"
+  ],
+  "related_career_ids": [
+    "career_software_engineer",
+    "career_ai_researcher",
+    "career_data_scientist",
+    "career_cybersecurity_analyst",
+    "career_systems_architect"
+  ],
+  "duration_years": 4,
+  "personality_weights": {
+    "openness": 0.8,
+    "conscientiousness": 0.7,
+    "extraversion": 0.3,
+    "agreeableness": 0.4,
+    "emotionalStability": 0.6
+  },
+  "learning_style_affinities": {
+    "visual": 0.7,
+    "readWrite": 0.8,
+    "auditory": 0.4,
+    "kinesthetic": 0.6,
+    "multimodal": 0.7
+  },
+  "prerequisites": ["mathematics", "logic"],
+  "market_demand": 0.95,
+  "salary_range_usd": [60000, 180000],
+  "tags": ["technology", "programming", "ai", "stem", "software"]
+}

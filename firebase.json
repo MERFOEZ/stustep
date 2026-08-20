@@ -1,0 +1,72 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "stustep-4c1ea",
+          "appId": "1:165136018294:android:1890c30e102959dbfc6857",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "stustep-4c1ea",
+          "configurations": {
+            "android": "1:165136018294:android:1890c30e102959dbfc6857",
+            "ios": "1:165136018294:ios:223a27f1dc62f06cfc6857",
+            "macos": "1:165136018294:ios:223a27f1dc62f06cfc6857",
+            "web": "1:165136018294:web:453efc30560fd4b8fc6857",
+            "windows": "1:165136018294:web:453efc30560fd4b8fc6857"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": false
+    },
+    "singleProjectMode": true
+  },
+  "hosting": {
+    "public": "build/web",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css|png|jpg|jpeg|svg|woff2|otf|ttf)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "/@(index.html|flutter_service_worker.js)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      }
+    ]
+  }
+}

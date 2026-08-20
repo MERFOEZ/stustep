@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "description": "StuStep SAIE Knowledge Base — Majors Index",
+  "majors": [
+    "computer_science.json",
+    "software_engineering.json",
+    "data_science.json",
+    "electrical_engineering.json",
+    "medicine.json",
+    "business_administration.json",
+    "law.json",
+    "psychology.json",
+    "architecture.json",
+    "arabic_language.json"
+  ]
+}

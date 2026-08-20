@@ -1,0 +1,60 @@
+{
+  "skills": [
+    {
+      "id": "skill_logical_reasoning",
+      "name": "Logical Reasoning",
+      "description": "Ability to analyze problems systematically, identify patterns, and draw valid conclusions from evidence.",
+      "is_technical": false,
+      "related_skill_ids": ["skill_mathematics", "skill_problem_solving"],
+      "tags": ["core", "analytical", "stem"]
+    },
+    {
+      "id": "skill_mathematics",
+      "name": "Mathematics",
+      "description": "Proficiency in arithmetic, algebra, geometry, calculus, and mathematical reasoning.",
+      "is_technical": true,
+      "related_skill_ids": ["skill_logical_reasoning", "skill_discrete_math"],
+      "tags": ["core", "stem", "quantitative"]
+    },
+    {
+      "id": "skill_problem_solving",
+      "name": "Problem Solving",
+      "description": "Structured approach to identifying, analyzing, and resolving complex problems efficiently.",
+      "is_technical": false,
+      "related_skill_ids": ["skill_logical_reasoning", "skill_critical_thinking"],
+      "tags": ["core", "analytical"]
+    },
+    {
+      "id": "skill_programming_fundamentals",
+      "name": "Programming Fundamentals",
+      "description": "Understanding of basic programming concepts: variables, loops, conditionals, functions, and object-oriented principles.",
+      "is_technical": true,
+      "related_skill_ids": ["skill_logical_reasoning", "skill_algorithms"],
+      "tags": ["computing", "software", "stem"]
+    },
+    {
+      "id": "skill_critical_thinking",
+      "name": "Critical Thinking",
+      "description": "Ability to evaluate information, question assumptions, and form well-reasoned judgments.",
+      "is_technical": false,
+      "related_skill_ids": ["skill_logical_reasoning", "skill_problem_solving"],
+      "tags": ["core", "analytical"]
+    },
+    {
+      "id": "skill_communication",
+      "name": "Communication",
+      "description": "Ability to convey ideas clearly and effectively, both verbally and in writing.",
+      "is_technical": false,
+      "related_skill_ids": ["skill_teamwork"],
+      "tags": ["soft", "social", "core"]
+    },
+    {
+      "id": "skill_teamwork",
+      "name": "Teamwork",
+      "description": "Ability to collaborate effectively with others toward a shared goal.",
+      "is_technical": false,
+      "related_skill_ids": ["skill_communication"],
+      "tags": ["soft", "social", "core"]
+    }
+  ]
+}

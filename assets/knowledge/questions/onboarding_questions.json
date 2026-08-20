@@ -1,0 +1,141 @@
+{
+  "questions": [
+    {
+      "id": "q_onboard_001",
+      "text": "في الأشهر الستة الماضية، هل وجدت نفسك تبحث أو تقرأ في أي من هذه المجالات من تلقاء نفسك — بدون أن يطلبه منك أحد؟",
+      "hint": "فكّر في ما قضيت فيه وقتاً باختيارك الحر — لا ما كان مطلوباً منك مدرسياً.",
+      "type": "multiSelect",
+      "difficulty": "basic",
+      "target_phase": "onboarding",
+      "target_domain_ids": [],
+      "options": [
+        {
+          "key": "tech",
+          "label": "تقنية: برمجة، ذكاء اصطناعي، أجهزة، إلكترونيات",
+          "target_domain_ids": ["technology", "technology_affinity", "logic"],
+          "evidence_weight": 0.80,
+          "direction": "positive"
+        },
+        {
+          "key": "science",
+          "label": "علوم: أحياء، كيمياء، فيزياء، طب، فلك",
+          "target_domain_ids": ["science", "research", "critical_thinking"],
+          "evidence_weight": 0.80,
+          "direction": "positive"
+        },
+        {
+          "key": "humanities",
+          "label": "إنسانيات: تاريخ، فلسفة، قانون، علم نفس، اجتماع",
+          "target_domain_ids": ["language", "empathy", "law"],
+          "evidence_weight": 0.75,
+          "direction": "positive"
+        },
+        {
+          "key": "business",
+          "label": "اقتصادية: أعمال، سوق مالي، ريادة، تسويق",
+          "target_domain_ids": ["business", "leadership", "decision_style"],
+          "evidence_weight": 0.75,
+          "direction": "positive"
+        },
+        {
+          "key": "creative",
+          "label": "إبداعية: أدب، فن، تصميم، موسيقى، عمارة",
+          "target_domain_ids": ["art", "creativity", "ambiguity_tolerance"],
+          "evidence_weight": 0.80,
+          "direction": "positive"
+        }
+      ],
+      "tags": ["onboarding", "behavioral_interest", "voluntary_learning"],
+      "repeatable": false
+    },
+    {
+      "id": "q_onboard_002",
+      "text": "عندما تريد أن تتعلم شيئاً جديداً بسرعة، ما الطريقة التي تلجأ إليها تلقائياً؟",
+      "hint": "فكّر في آخر مرة تعلمت فيها شيئاً خارج المدرسة — كيف بدأت؟",
+      "type": "multipleChoice",
+      "difficulty": "basic",
+      "target_phase": "onboarding",
+      "target_domain_ids": [],
+      "options": [
+        {
+          "key": "a",
+          "label": "أُجرّب مباشرة وأتعلم من الأخطاء",
+          "target_domain_ids": ["practical_vs_theoretical", "technology", "problem_solving"],
+          "evidence_weight": 0.75,
+          "direction": "positive"
+        },
+        {
+          "key": "b",
+          "label": "أقرأ مقالات وكتباً حتى أفهم التفاصيل بعمق",
+          "target_domain_ids": ["research", "self_learning", "critical_thinking"],
+          "evidence_weight": 0.75,
+          "direction": "positive"
+        },
+        {
+          "key": "c",
+          "label": "أبحث عن محاضرات ومقاطع حتى أرى الفكرة مُشرحة",
+          "target_domain_ids": ["self_learning", "practical_vs_theoretical"],
+          "evidence_weight": 0.65,
+          "direction": "positive"
+        },
+        {
+          "key": "d",
+          "label": "أسأل شخصاً خبيراً وأناقشه حتى تتضح الصورة",
+          "target_domain_ids": ["communication", "teamwork", "empathy"],
+          "evidence_weight": 0.65,
+          "direction": "positive"
+        }
+      ],
+      "tags": ["onboarding", "learning_style", "behavioral"],
+      "repeatable": false
+    },
+    {
+      "id": "q_onboard_003",
+      "text": "في الفصل الدراسي الأخير، في أيّ المواد كنت من الطلاب الذين يفهمون المادة أسرع من غيرهم؟",
+      "hint": "اختر ما ينطبق عليك فعلاً — ليس ما تتمنى أن تكون فيه.",
+      "type": "multiSelect",
+      "difficulty": "basic",
+      "target_phase": "onboarding",
+      "target_domain_ids": [],
+      "options": [
+        {
+          "key": "math",
+          "label": "الرياضيات والإحصاء",
+          "target_domain_ids": ["mathematics", "logic", "academic_performance"],
+          "evidence_weight": 0.85,
+          "direction": "positive"
+        },
+        {
+          "key": "sciences",
+          "label": "الفيزياء والكيمياء والأحياء",
+          "target_domain_ids": ["science", "critical_thinking", "academic_performance"],
+          "evidence_weight": 0.85,
+          "direction": "positive"
+        },
+        {
+          "key": "arabic_english",
+          "label": "اللغة العربية أو الإنجليزية والأدب",
+          "target_domain_ids": ["language", "communication", "academic_performance"],
+          "evidence_weight": 0.80,
+          "direction": "positive"
+        },
+        {
+          "key": "social",
+          "label": "التاريخ والجغرافيا والتربية الوطنية",
+          "target_domain_ids": ["empathy", "law", "academic_performance"],
+          "evidence_weight": 0.70,
+          "direction": "positive"
+        },
+        {
+          "key": "computers",
+          "label": "الحاسب والتقنية",
+          "target_domain_ids": ["technology", "logic", "academic_performance"],
+          "evidence_weight": 0.85,
+          "direction": "positive"
+        }
+      ],
+      "tags": ["onboarding", "academic_performance", "behavioral"],
+      "repeatable": false
+    }
+  ]
+}

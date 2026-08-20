@@ -1,0 +1,692 @@
+[
+  {
+    "id": "q_001",
+    "text": "مشكلة أمامك: مستشفى في مدينة صغيرة يعاني من نقص حاد في الكوادر الطبية. كيف تفكر في المعالجة أولاً؟",
+    "hint": "لا يوجد جواب صح أو غلط — فكّر بصدق في ردّة فعلك الطبيعية.",
+    "type": "situationalJudgment",
+    "difficulty": "intermediate",
+    "target_phase": "exploration",
+    "target_domain_ids": ["logic", "empathy", "law", "leadership"],
+    "options": [
+      {
+        "key": "a",
+        "label": "أُحلّل البيانات — عدد المرضى، التوزيع، الكوادر المتاحة — وأبني نموذجاً للتوزيع الأمثل",
+        "target_domain_ids": ["logic", "mathematics", "problem_solving"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "أدرس احتياجات المرضى المباشرة وأحدد أين الضرر الأكبر على حياتهم",
+        "target_domain_ids": ["empathy", "medicine", "critical_thinking"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أُراجع اللوائح والسياسات الصحية وأجد الحلول ضمن الإطار القانوني والتنظيمي",
+        "target_domain_ids": ["law", "research", "decision_style"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "أُفكر في جذب تمويل وكوادر وتحفيز المجتمع للمشاركة في الحل",
+        "target_domain_ids": ["leadership", "communication", "business"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["exploration", "problem_solving_style", "situational"]
+  },
+  {
+    "id": "q_002",
+    "text": "في وقت فراغك الحقيقي — بعيداً عن أي التزام — ماذا تجد نفسك تفعل بشكل طبيعي؟",
+    "hint": "فكّر في الأيام الأخيرة التي اخترت فيها ما تفعله دون أي ضغط خارجي.",
+    "type": "multipleChoice",
+    "difficulty": "basic",
+    "target_phase": "exploration",
+    "target_domain_ids": ["technology_affinity", "creativity", "research", "leadership"],
+    "options": [
+      {
+        "key": "a",
+        "label": "أبرمج أو أُجرّب أدوات تقنية أو ألعب ألعاب استراتيجية",
+        "target_domain_ids": ["technology", "technology_affinity", "logic"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "أقرأ أو أبحث في مواضيع تثير فضولي — علمية أو تاريخية أو فكرية",
+        "target_domain_ids": ["research", "self_learning", "critical_thinking"],
+        "evidence_weight": 0.80,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أرسم أو أُصمّم أو أكتب أو أنتج شيئاً إبداعياً",
+        "target_domain_ids": ["art", "creativity", "ambiguity_tolerance"],
+        "evidence_weight": 0.80,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "أُنظّم مبادرة أو مشروع مع أصدقاء أو أتابع الأسواق والأعمال",
+        "target_domain_ids": ["business", "leadership", "decision_style"],
+        "evidence_weight": 0.80,
+        "direction": "positive"
+      },
+      {
+        "key": "e",
+        "label": "أُفضّل الابتعاد عن الشاشات والأرقام — أخرج مع الناس أو أمارس رياضة",
+        "target_domain_ids": ["technology", "technology_affinity", "mathematics"],
+        "evidence_weight": 0.80,
+        "direction": "negative"
+      }
+    ],
+    "tags": ["exploration", "voluntary_behavior", "interests"]
+  },
+  {
+    "id": "q_003",
+    "text": "أمامك طريقان لتعلّم الذكاء الاصطناعي: كتاب متخصص يشرح الخوارزميات من أساسها رياضياً، وكورس عملي يعلّمك بناء تطبيق AI خلال أسبوع. أيّهما تختار تلقائياً؟",
+    "hint": "فكّر في ما تفعله فعلاً حين تريد تعلّم شيء جديد — لا ما تظنه الأفضل.",
+    "type": "multipleChoice",
+    "difficulty": "intermediate",
+    "target_phase": "exploration",
+    "target_domain_ids": ["practical_vs_theoretical", "mathematics", "technology"],
+    "options": [
+      {
+        "key": "a",
+        "label": "الكتاب — أريد أن أفهم لماذا تعمل الخوارزمية قبل أي شيء",
+        "target_domain_ids": ["practical_vs_theoretical", "mathematics", "research"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "الكورس العملي — أريد بناء شيء يعمل أسرع ما يمكن",
+        "target_domain_ids": ["technology", "problem_solving"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أبدأ بالكورس ثم أعود للكتاب لأفهم ما جرى",
+        "target_domain_ids": ["self_learning", "critical_thinking"],
+        "evidence_weight": 0.65,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "لا هذا ولا هذا — التقنية ليست مجالي",
+        "target_domain_ids": ["technology", "technology_affinity", "mathematics"],
+        "evidence_weight": 0.90,
+        "direction": "negative"
+      }
+    ],
+    "tags": ["exploration", "learning_orientation", "tech_theory_vs_practice"]
+  },
+  {
+    "id": "q_004",
+    "text": "عندما تسمع عن اكتشاف جديد — مثل لقاح، أو ثغرة أمنية، أو اختراع طاقة — ما أول شيء يدور في ذهنك تلقائياً؟",
+    "hint": "لا تفكّر في ما يجب أن تفكّر — انتبه لردّة فعلك الأولى الفعلية.",
+    "type": "multipleChoice",
+    "difficulty": "intermediate",
+    "target_phase": "exploration",
+    "target_domain_ids": ["science", "empathy", "law", "business"],
+    "options": [
+      {
+        "key": "a",
+        "label": "كيف يعمل هذا على المستوى العلمي أو التقني؟",
+        "target_domain_ids": ["science", "critical_thinking", "practical_vs_theoretical"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "من سيستفيد منه وكيف سيؤثر في حياة الناس؟",
+        "target_domain_ids": ["empathy", "medicine", "communication"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "ما المشاكل الأخلاقية أو القانونية التي يُثيرها؟",
+        "target_domain_ids": ["law", "critical_thinking", "language"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "ما الفرصة التجارية أو المشروع الذي يمكن بناؤه حوله؟",
+        "target_domain_ids": ["business", "leadership", "decision_style"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["exploration", "cognitive_response", "behavioral"]
+  },
+  {
+    "id": "q_005",
+    "text": "أصعب مشكلة واجهتها في حياتك — داخل المدرسة أو خارجها — كيف تصرّفت معها؟",
+    "hint": "صف ما فعلته فعلاً، لا ما كنت ستتمنى أن تفعله. لا يوجد جواب مثالي.",
+    "type": "openEnded",
+    "difficulty": "intermediate",
+    "target_phase": "exploration",
+    "target_domain_ids": ["problem_solving", "decision_style", "self_learning", "stress_preference"],
+    "options": [],
+    "tags": ["exploration", "behavioral_evidence", "problem_solving"]
+  },
+  {
+    "id": "q_006",
+    "text": "لو كُلّفت بمشروع بحثي تختار موضوعه بنفسك — من أين ستبدأ؟",
+    "hint": "فكّر في آخر مرة أردت أن تفهم شيئاً بعمق — ما الذي جذبك للبدء؟",
+    "type": "multipleChoice",
+    "difficulty": "intermediate",
+    "target_phase": "deepening",
+    "target_domain_ids": ["research", "practical_vs_theoretical", "science", "empathy"],
+    "options": [
+      {
+        "key": "a",
+        "label": "أختار سؤالاً يمكن قياسه بالبيانات وإثباته — أبحث عن الأرقام أولاً",
+        "target_domain_ids": ["research", "mathematics", "logic"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "أختار مشكلة في مجتمعي أو حياتي وأحاول فهم جذورها",
+        "target_domain_ids": ["empathy", "language", "critical_thinking"],
+        "evidence_weight": 0.80,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أختار موضوعاً لم يكتب عنه كثيرون — أبحث في الهامش والتفاصيل الخفية",
+        "target_domain_ids": ["creativity", "ambiguity_tolerance", "research"],
+        "evidence_weight": 0.80,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "أختار موضوعاً له تطبيق عملي مباشر يمكن تنفيذه وقياس أثره",
+        "target_domain_ids": ["problem_solving", "technology", "science"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["deepening", "research_style", "behavioral"]
+  },
+  {
+    "id": "q_007",
+    "text": "في عملك الأكاديمي، أيّ نوع من النجاح يشعرك فعلاً بالرضا — بغض النظر عن التقدير؟",
+    "hint": "فكّر في اللحظة التي شعرت فيها بأنك أنجزت شيئاً حقيقياً.",
+    "type": "multipleChoice",
+    "difficulty": "intermediate",
+    "target_phase": "deepening",
+    "target_domain_ids": ["mathematics", "communication", "creativity", "practical_vs_theoretical"],
+    "options": [
+      {
+        "key": "a",
+        "label": "إيجاد الإجابة الصحيحة لمسألة معقدة بعد تفكير عميق",
+        "target_domain_ids": ["logic", "mathematics", "critical_thinking"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "إقناع أستاذ أو زملاء بوجهة نظري أو موقفي",
+        "target_domain_ids": ["communication", "law", "leadership"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "إنتاج شيء مُبتكر لم يفكر فيه أحد قبلي",
+        "target_domain_ids": ["creativity", "art", "ambiguity_tolerance"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "بناء شيء فعلي يعمل ويترك أثراً ملموساً",
+        "target_domain_ids": ["technology", "problem_solving"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["deepening", "motivation", "behavioral"]
+  },
+  {
+    "id": "q_008",
+    "text": "صديقك يمر بأزمة صحية مفاجئة وأنت معه. كيف تتصرف تلقائياً؟",
+    "hint": "فكّر في آخر مرة كان أحد قريب منك في أزمة — ما الذي فعلته فعلاً؟",
+    "type": "situationalJudgment",
+    "difficulty": "intermediate",
+    "target_phase": "deepening",
+    "target_domain_ids": ["empathy", "logic", "communication", "medicine"],
+    "options": [
+      {
+        "key": "a",
+        "label": "أُبقيه هادئاً وأُركّز على فهم الأعراض لتقييم الوضع بدقة",
+        "target_domain_ids": ["empathy", "medicine", "critical_thinking"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "أتصل بالطوارئ فوراً وأُنظّم الموقف حتى يصل المختصون",
+        "target_domain_ids": ["decision_style", "leadership", "stress_preference"],
+        "evidence_weight": 0.80,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أشعر بقلق شديد — المواقف الطبية تُرهقني نفسياً",
+        "target_domain_ids": ["medicine", "stress_preference", "empathy"],
+        "evidence_weight": 0.85,
+        "direction": "negative"
+      },
+      {
+        "key": "d",
+        "label": "أُحلّل ما حدث لاحقاً لفهم السبب وتفادي تكراره",
+        "target_domain_ids": ["research", "logic", "science"],
+        "evidence_weight": 0.80,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["deepening", "medical_response", "behavioral"]
+  },
+  {
+    "id": "q_009",
+    "text": "هل سبق أن أنهيت مشروعاً بمجهودك الشخصي — برنامجاً، عملاً فنياً، بحثاً، نشاطاً منظّماً، أو أي شيء آخر؟ صِفه باختصار.",
+    "hint": "المشروع لا يحتاج أن يكون ضخماً — المهم أنك بدأته وأنهيته بمبادرتك.",
+    "type": "openEnded",
+    "difficulty": "intermediate",
+    "target_phase": "deepening",
+    "target_domain_ids": ["self_learning", "problem_solving", "creativity", "technology", "academic_performance"],
+    "options": [],
+    "tags": ["deepening", "behavioral_evidence", "achievement"]
+  },
+  {
+    "id": "q_010",
+    "text": "رتّب هذه المهام من الأكثر إثارة وشغفاً لك إلى الأقل — بصدق تام:",
+    "hint": "رتّب بناءً على ما تشعر به حقيقياً، لا ما يبدو مثيراً من الخارج.",
+    "type": "ranking",
+    "difficulty": "intermediate",
+    "target_phase": "deepening",
+    "target_domain_ids": ["technology", "medicine", "business", "law"],
+    "options": [
+      {
+        "key": "أ",
+        "label": "بناء نموذج ذكاء اصطناعي يتعلم ويتنبأ بأنماط في البيانات",
+        "target_domain_ids": ["logic", "mathematics", "research", "technology"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "ب",
+        "label": "تشخيص مرض نادر وإنقاذ حياة مريض معقّد",
+        "target_domain_ids": ["medicine", "empathy", "science", "critical_thinking"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "ج",
+        "label": "إطلاق شركة ناشئة ورؤيتها تنمو لتُغيّر السوق",
+        "target_domain_ids": ["business", "leadership", "decision_style"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "د",
+        "label": "الدفاع عن شخص مظلوم في المحكمة وتحقيق العدالة",
+        "target_domain_ids": ["law", "communication", "critical_thinking"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["deepening", "major_preference", "ranking"]
+  },
+  {
+    "id": "q_011",
+    "text": "أيّ من هذه السيناريوات سيجعلك تشعر بأنك في مكانك الصحيح تماماً؟",
+    "hint": "تخيّل نفسك في كل موقف — أيّها يُشعرك بالطاقة لا بالإجهاد؟",
+    "type": "situationalJudgment",
+    "difficulty": "advanced",
+    "target_phase": "calibration",
+    "target_domain_ids": ["technology", "medicine", "law", "business", "creativity"],
+    "options": [
+      {
+        "key": "a",
+        "label": "أكتب خوارزمية معقدة تحل مشكلة لم يحلها أحد من قبل",
+        "target_domain_ids": ["logic", "mathematics", "problem_solving", "research"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "أبني تطبيقاً جديداً وأرى المستخدمين يستخدمونه ويستفيدون",
+        "target_domain_ids": ["technology", "problem_solving", "teamwork"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أكون مع مريض، أُشخّص حالته وأرى التحسن في وجهه",
+        "target_domain_ids": ["medicine", "empathy", "science"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "أقف في قاعة وأُقدم حجة تُغير النتيجة أو تُقنع الجمهور",
+        "target_domain_ids": ["law", "communication", "leadership"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "e",
+        "label": "أُدير فريقاً لتحقيق هدف تجاري طموح في وقت محدد",
+        "target_domain_ids": ["business", "leadership", "decision_style"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["calibration", "career_environment", "situational"]
+  },
+  {
+    "id": "q_013",
+    "text": "بناءً على تجاربك — في أيّ من هذه البيئات تُنتج وتُبدع أكثر؟",
+    "hint": "فكّر في المرات التي شعرت فيها بأنك في عنصرك — ما كانت طبيعة المهمة؟",
+    "type": "multipleChoice",
+    "difficulty": "advanced",
+    "target_phase": "calibration",
+    "target_domain_ids": ["practical_vs_theoretical", "technology", "empathy", "creativity", "business"],
+    "options": [
+      {
+        "key": "a",
+        "label": "مسائل تقنية أو رياضية محددة لها حل دقيق يمكن التحقق منه",
+        "target_domain_ids": ["logic", "mathematics", "technology"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "مواقف إنسانية معقدة تتطلب فهماً عاطفياً وتواصلاً دقيقاً",
+        "target_domain_ids": ["empathy", "medicine", "communication"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "مساحات إبداعية مفتوحة لا قيود فيها ولا إجابة واحدة صحيحة",
+        "target_domain_ids": ["creativity", "art", "ambiguity_tolerance"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "أهداف تجارية أو تنظيمية تتطلب تخطيطاً وقيادة واتخاذ قرارات",
+        "target_domain_ids": ["business", "leadership", "decision_style"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "e",
+        "label": "لا أشعر بالإنتاجية في أي من هذه — أُفضّل العمل الروتيني المنظّم",
+        "target_domain_ids": ["ambiguity_tolerance", "creativity", "problem_solving"],
+        "evidence_weight": 0.75,
+        "direction": "negative"
+      }
+    ],
+    "tags": ["calibration", "work_environment", "behavioral"]
+  },
+  {
+    "id": "q_014",
+    "text": "أيّ من هذه المهام تنجزها بمتعة حقيقية — حتى لو لم يطلبه منك أحد؟",
+    "hint": "المتعة الحقيقية تعني لا تشعر بعبء المهمة — بل تنجذب إليها تلقائياً.",
+    "type": "multipleChoice",
+    "difficulty": "intermediate",
+    "target_phase": "exploration",
+    "target_domain_ids": ["logic", "science", "communication", "problem_solving"],
+    "options": [
+      {
+        "key": "a",
+        "label": "فحص بيانات وأرقام لاكتشاف ما تعنيه أو تتنبأ به",
+        "target_domain_ids": ["logic", "mathematics", "research"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "تجربة أشياء جديدة علمياً ومراقبة ما يحدث بدقة",
+        "target_domain_ids": ["science", "research", "critical_thinking"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "إقناع الآخرين أو تقديم أفكار بأسلوب يؤثر فيهم",
+        "target_domain_ids": ["communication", "leadership", "law"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "تصميم حلول عملية أو بناء أشياء تعمل فعلاً",
+        "target_domain_ids": ["problem_solving", "technology"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "e",
+        "label": "لا شيء من هذا — أفضّل المهام الاجتماعية والعلاقات الإنسانية",
+        "target_domain_ids": ["logic", "mathematics", "technology", "research"],
+        "evidence_weight": 0.75,
+        "direction": "negative"
+      }
+    ],
+    "tags": ["exploration", "genuine_interest", "behavioral"]
+  },
+  {
+    "id": "q_016",
+    "text": "نظام ذكاء اصطناعي يُحقق نتائج ممتازة لكنه «صندوق أسود» لا أحد يفهم لماذا يعمل. ما الذي يشغل ذهنك أكثر؟",
+    "hint": "انتبه لردّة فعلك الأولى — ليس ما يجب أن تهتم به.",
+    "type": "multipleChoice",
+    "difficulty": "advanced",
+    "target_phase": "calibration",
+    "target_domain_ids": ["practical_vs_theoretical", "logic", "technology", "empathy"],
+    "options": [
+      {
+        "key": "a",
+        "label": "لماذا يعمل؟ أريد فهم الخوارزمية من الداخل رياضياً",
+        "target_domain_ids": ["practical_vs_theoretical", "mathematics", "research", "logic"],
+        "evidence_weight": 0.95,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "كيف أستخدمه لبناء منتج يعمل الآن — التفاصيل تأتي لاحقاً",
+        "target_domain_ids": ["technology", "problem_solving"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "هل نتائجه موثوقة إحصائياً؟ أريد التحقق بالبيانات",
+        "target_domain_ids": ["mathematics", "critical_thinking", "research", "science"],
+        "evidence_weight": 0.95,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "من سيتأثر سلباً إذا أخطأ؟ أريد ضمان سلامته للمجتمع",
+        "target_domain_ids": ["empathy", "law", "communication"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["calibration", "ai_vs_swe_discriminator", "cognitive_style"]
+  },
+  {
+    "id": "q_017",
+    "text": "لديك مشروع تقني: تحليل بيانات 10,000 مريض لتحسين التشخيص. أيّ الأدوار تناسبك أكثر؟",
+    "hint": "فكّر في ما تجيده وتستمتع به — لا في ما يبدو أكثر أهمية.",
+    "type": "situationalJudgment",
+    "difficulty": "advanced",
+    "target_phase": "calibration",
+    "target_domain_ids": ["mathematics", "technology", "empathy", "science"],
+    "options": [
+      {
+        "key": "a",
+        "label": "أبني نموذجاً إحصائياً يتنبأ بالحالات الخطرة بدقة عالية",
+        "target_domain_ids": ["mathematics", "research", "logic", "science"],
+        "evidence_weight": 0.95,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "أبني نظاماً يُنبّه الأطباء فور اكتشاف خطر — ينتقل من بيانات لقرار فعلي",
+        "target_domain_ids": ["technology", "problem_solving", "teamwork"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أدرس البيانات بعمق لفهم أسباب الأمراض وأنشر بحثاً علمياً",
+        "target_domain_ids": ["science", "research", "critical_thinking", "practical_vs_theoretical"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "أتحدث مع الأطباء والمرضى لأفهم ما يحتاجونه فعلاً أولاً",
+        "target_domain_ids": ["empathy", "communication", "medicine"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["calibration", "data_science_discriminator", "situational"]
+  },
+  {
+    "id": "q_018",
+    "text": "مسألة إحصاء صعبة جداً أمامك — احتمالات، توزيعات، ومعادلات. كيف تتعامل معها؟",
+    "hint": "كن صادقاً — هذا يساعد على فهمك بشكل أدق.",
+    "type": "multipleChoice",
+    "difficulty": "intermediate",
+    "target_phase": "deepening",
+    "target_domain_ids": ["mathematics", "logic", "self_learning"],
+    "options": [
+      {
+        "key": "a",
+        "label": "أقضي ساعات حتى أفهمها من الأساس — هذا النوع يستهويني",
+        "target_domain_ids": ["mathematics", "logic", "self_learning"],
+        "evidence_weight": 0.95,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "أستخدم مكتبة جاهزة أو كوداً يحلها — المهم أن أتجاوزها",
+        "target_domain_ids": ["technology", "problem_solving"],
+        "evidence_weight": 0.80,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أسأل أستاذاً أو زميلاً حتى تتضح الصورة",
+        "target_domain_ids": ["communication", "teamwork", "self_learning"],
+        "evidence_weight": 0.60,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "الرياضيات والإحصاء ليست نقطة قوتي — أتجنب هذا المسار",
+        "target_domain_ids": ["mathematics", "logic"],
+        "evidence_weight": 0.95,
+        "direction": "negative"
+      }
+    ],
+    "tags": ["deepening", "mathematics_depth", "self_awareness"]
+  },
+  {
+    "id": "q_019",
+    "text": "أنت في غرفة الطوارئ — طفل يبكي، أعراض غريبة، الأسرة خائفة. كيف تجد نفسك تشعر لو كنت الطبيب؟",
+    "hint": "تخيّل نفسك في الموقف حقيقياً — لا تُجيب بما يُفترض.",
+    "type": "situationalJudgment",
+    "difficulty": "advanced",
+    "target_phase": "calibration",
+    "target_domain_ids": ["medicine", "empathy", "stress_preference", "science"],
+    "options": [
+      {
+        "key": "a",
+        "label": "شعور بالتحدي والرغبة العميقة في المساعدة — هذا ما يُحرّكني",
+        "target_domain_ids": ["medicine", "empathy", "science", "stress_preference"],
+        "evidence_weight": 0.95,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "فضول علمي — أريد معرفة ما هذه الأعراض وهل هي حالة نادرة",
+        "target_domain_ids": ["science", "research", "critical_thinking"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "ضغط نفسي شديد — هذا النوع من المواقف يُرهقني كثيراً",
+        "target_domain_ids": ["medicine", "stress_preference", "empathy"],
+        "evidence_weight": 0.90,
+        "direction": "negative"
+      },
+      {
+        "key": "d",
+        "label": "أُركّز على تنظيم الموقف وتنسيق الفريق — لكن التشخيص يُقلقني",
+        "target_domain_ids": ["leadership", "decision_style", "medicine"],
+        "evidence_weight": 0.75,
+        "direction": "positive"
+      }
+    ],
+    "tags": ["calibration", "medicine_discriminator", "emotional_response"]
+  },
+  {
+    "id": "q_020",
+    "text": "مشروع تقني كبير لمدة 3 أشهر. أيّ دور يُعطيك أكبر قدر من الرضا؟",
+    "hint": "فكّر في ما تفضّله فعلاً — لا في ما هو أكثر قيمة للفريق.",
+    "type": "multipleChoice",
+    "difficulty": "intermediate",
+    "target_phase": "deepening",
+    "target_domain_ids": ["teamwork", "logic", "leadership", "communication"],
+    "options": [
+      {
+        "key": "a",
+        "label": "أعمل بمفردي على الكود الأساسي — أُفضّل التركيز العميق بعيداً عن الاجتماعات",
+        "target_domain_ids": ["logic", "technology", "research"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "b",
+        "label": "أُنسّق بين المطورين وأضمن أن الكل يسير باتجاه واحد",
+        "target_domain_ids": ["teamwork", "leadership", "communication"],
+        "evidence_weight": 0.90,
+        "direction": "positive"
+      },
+      {
+        "key": "c",
+        "label": "أُحلّل متطلبات العملاء وأُترجمها إلى متطلبات تقنية للفريق",
+        "target_domain_ids": ["communication", "business", "empathy"],
+        "evidence_weight": 0.85,
+        "direction": "positive"
+      },
+      {
+        "key": "d",
+        "label": "لا أُحب المشاريع الجماعية كثيراً — العمل الفردي أفضل لي",
+        "target_domain_ids": ["teamwork", "communication"],
+        "evidence_weight": 0.85,
+        "direction": "negative"
+      }
+    ],
+    "tags": ["deepening", "swe_team_discriminator", "work_style"]
+  }
+]

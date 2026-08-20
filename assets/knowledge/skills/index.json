@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "description": "StuStep SAIE Knowledge Base — Skills Index",
+  "skills": [
+    "core_skills.json",
+    "stem_skills.json",
+    "social_skills.json"
+  ]
+}

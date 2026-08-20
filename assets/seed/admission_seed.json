@@ -1,0 +1,964 @@
+{
+  "_meta": {
+    "version": 1,
+    "generatedFor": "StuStep — Admission Module (Phase 2)",
+    "note": "معرّفات هذه البذرة ثابتة ومقروءة. راجع docs/admission_phase_2_explanation.md قبل الاستيراد.",
+    "interestTagsSource": "InterestCatalog.allIds — 14 معرّفاً"
+  },
+  "colleges": [
+    {
+      "id": "col_engineering",
+      "name": "كلية الهندسة",
+      "icon": "engineering"
+    },
+    {
+      "id": "col_medicine",
+      "name": "كلية الطب والعلوم الصحية",
+      "icon": "medical"
+    },
+    {
+      "id": "col_computer",
+      "name": "كلية الحاسوب وتقنية المعلومات",
+      "icon": "computer"
+    },
+    {
+      "id": "col_business",
+      "name": "كلية التجارة والاقتصاد",
+      "icon": "business"
+    },
+    {
+      "id": "col_law",
+      "name": "كلية الشريعة والقانون",
+      "icon": "law"
+    }
+  ],
+  "departments": [
+    {
+      "id": "dep_civil_eng",
+      "name": "الهندسة المدنية",
+      "collegeId": "col_engineering"
+    },
+    {
+      "id": "dep_electrical_eng",
+      "name": "الهندسة الكهربائية",
+      "collegeId": "col_engineering"
+    },
+    {
+      "id": "dep_mechanical_eng",
+      "name": "الهندسة الميكانيكية",
+      "collegeId": "col_engineering"
+    },
+    {
+      "id": "dep_architecture",
+      "name": "الهندسة المعمارية",
+      "collegeId": "col_engineering"
+    },
+    {
+      "id": "dep_human_medicine",
+      "name": "الطب البشري",
+      "collegeId": "col_medicine"
+    },
+    {
+      "id": "dep_dentistry",
+      "name": "طب الأسنان",
+      "collegeId": "col_medicine"
+    },
+    {
+      "id": "dep_pharmacy",
+      "name": "الصيدلة",
+      "collegeId": "col_medicine"
+    },
+    {
+      "id": "dep_nursing",
+      "name": "التمريض",
+      "collegeId": "col_medicine"
+    },
+    {
+      "id": "dep_cs",
+      "name": "علوم الحاسوب",
+      "collegeId": "col_computer"
+    },
+    {
+      "id": "dep_software_eng",
+      "name": "هندسة البرمجيات",
+      "collegeId": "col_computer"
+    },
+    {
+      "id": "dep_information_sys",
+      "name": "نظم المعلومات",
+      "collegeId": "col_computer"
+    },
+    {
+      "id": "dep_cyber_security",
+      "name": "الأمن السيبراني",
+      "collegeId": "col_computer"
+    },
+    {
+      "id": "dep_accounting",
+      "name": "المحاسبة",
+      "collegeId": "col_business"
+    },
+    {
+      "id": "dep_business_admin",
+      "name": "إدارة الأعمال",
+      "collegeId": "col_business"
+    },
+    {
+      "id": "dep_law",
+      "name": "القانون",
+      "collegeId": "col_law"
+    }
+  ],
+  "department_guides": [
+    {
+      "departmentId": "dep_civil_eng",
+      "collegeId": "col_engineering",
+      "description": "الهندسة المدنية تُعنى بتصميم وتنفيذ وصيانة المنشآت من مبانٍ وجسور وطرق وشبكات مياه، مع دراسة سلوك المواد والتربة تحت الأحمال المختلفة.",
+      "coreSubjects": [
+        "الرياضيات الهندسية",
+        "الستاتيكا والديناميكا",
+        "مقاومة المواد",
+        "الخرسانة المسلحة",
+        "ميكانيكا التربة",
+        "المساحة",
+        "هندسة الطرق"
+      ],
+      "skills": [
+        "تصميم المنشآت الخرسانية والمعدنية",
+        "قراءة وإعداد المخططات التنفيذية",
+        "إدارة مواقع البناء",
+        "تقدير الكميات والتكاليف",
+        "استخدام AutoCAD وSAP2000"
+      ],
+      "careers": [
+        "مهندس تصميم إنشائي",
+        "مهندس موقع وتنفيذ",
+        "مهندس مساحة",
+        "مدير مشاريع إنشائية",
+        "مهندس طرق وجسور"
+      ],
+      "interestTags": [
+        "math",
+        "physics",
+        "design"
+      ],
+      "studyYears": 5,
+      "degreeAwarded": "بكالوريوس هندسة",
+      "orderIndex": 1
+    },
+    {
+      "departmentId": "dep_electrical_eng",
+      "collegeId": "col_engineering",
+      "description": "الهندسة الكهربائية تدرس توليد ونقل وتوزيع الطاقة الكهربائية، إضافة إلى الدوائر الإلكترونية وأنظمة التحكم والاتصالات.",
+      "coreSubjects": [
+        "الدوائر الكهربائية",
+        "الإلكترونيات",
+        "الآلات الكهربائية",
+        "أنظمة القوى",
+        "نظرية التحكم",
+        "المجالات الكهرومغناطيسية"
+      ],
+      "skills": [
+        "تصميم وتحليل الدوائر",
+        "تصميم شبكات التوزيع",
+        "برمجة المتحكمات الدقيقة",
+        "صيانة الأنظمة الكهربائية",
+        "العمل بأنظمة الطاقة الشمسية"
+      ],
+      "careers": [
+        "مهندس شبكات كهربائية",
+        "مهندس طاقة متجددة",
+        "مهندس تحكم وأتمتة",
+        "مهندس صيانة صناعية",
+        "مهندس اتصالات"
+      ],
+      "interestTags": [
+        "math",
+        "physics",
+        "electronics"
+      ],
+      "studyYears": 5,
+      "degreeAwarded": "بكالوريوس هندسة",
+      "orderIndex": 2
+    },
+    {
+      "departmentId": "dep_mechanical_eng",
+      "collegeId": "col_engineering",
+      "description": "الهندسة الميكانيكية تتناول تصميم وتصنيع وتشغيل الآلات والمحركات وأنظمة التبريد والتكييف وخطوط الإنتاج.",
+      "coreSubjects": [
+        "الميكانيكا الهندسية",
+        "الديناميكا الحرارية",
+        "انتقال الحرارة",
+        "ميكانيكا الموائع",
+        "تصميم الآلات",
+        "عمليات التصنيع"
+      ],
+      "skills": [
+        "تصميم الأجزاء الميكانيكية",
+        "تحليل الأنظمة الحرارية",
+        "استخدام SolidWorks",
+        "تخطيط الصيانة الوقائية",
+        "إدارة خطوط الإنتاج"
+      ],
+      "careers": [
+        "مهندس تصميم ميكانيكي",
+        "مهندس صيانة",
+        "مهندس تكييف وتبريد",
+        "مهندس إنتاج",
+        "مهندس سيارات"
+      ],
+      "interestTags": [
+        "math",
+        "physics",
+        "design"
+      ],
+      "studyYears": 5,
+      "degreeAwarded": "بكالوريوس هندسة",
+      "orderIndex": 3
+    },
+    {
+      "departmentId": "dep_architecture",
+      "collegeId": "col_engineering",
+      "description": "الهندسة المعمارية تجمع بين الفن والهندسة في تصميم المباني والفراغات، مع مراعاة الوظيفة والجمال والبيئة والهوية العمرانية.",
+      "coreSubjects": [
+        "التصميم المعماري",
+        "تاريخ العمارة",
+        "الإظهار المعماري",
+        "نظريات العمارة",
+        "التصميم الحضري",
+        "المواد ومبادئ الإنشاء"
+      ],
+      "skills": [
+        "إعداد التصاميم والمخططات",
+        "الرسم اليدوي والرقمي",
+        "استخدام AutoCAD وRevit و3ds Max",
+        "إعداد المجسمات",
+        "التحليل البيئي للموقع"
+      ],
+      "careers": [
+        "مهندس معماري",
+        "مصمم داخلي",
+        "مخطط عمراني",
+        "مصمم مجسمات ثلاثية الأبعاد",
+        "مستشار تصميم"
+      ],
+      "interestTags": [
+        "design",
+        "math",
+        "writing"
+      ],
+      "studyYears": 5,
+      "degreeAwarded": "بكالوريوس هندسة",
+      "orderIndex": 4
+    },
+    {
+      "departmentId": "dep_human_medicine",
+      "collegeId": "col_medicine",
+      "description": "الطب البشري يؤهل الطالب لتشخيص الأمراض وعلاجها والوقاية منها، عبر دراسة تركيب جسم الإنسان ووظائفه والتدريب السريري في المستشفيات.",
+      "coreSubjects": [
+        "التشريح",
+        "علم وظائف الأعضاء",
+        "الكيمياء الحيوية",
+        "علم الأدوية",
+        "علم الأمراض",
+        "الباطنة",
+        "الجراحة",
+        "طب المجتمع"
+      ],
+      "skills": [
+        "الفحص السريري والتشخيص",
+        "قراءة التحاليل والأشعة",
+        "التعامل مع الحالات الطارئة",
+        "التواصل مع المرضى",
+        "اتخاذ القرار الطبي"
+      ],
+      "careers": [
+        "طبيب عام",
+        "طبيب مقيم ثم اختصاصي",
+        "طبيب طوارئ",
+        "باحث طبي",
+        "طبيب صحة عامة"
+      ],
+      "interestTags": [
+        "biology",
+        "chemistry",
+        "helping_people",
+        "research"
+      ],
+      "studyYears": 6,
+      "degreeAwarded": "بكالوريوس طب وجراحة",
+      "orderIndex": 1
+    },
+    {
+      "departmentId": "dep_dentistry",
+      "collegeId": "col_medicine",
+      "description": "طب الأسنان يختص بصحة الفم والأسنان تشخيصاً وعلاجاً وتجميلاً، ويجمع بين المعرفة الطبية والمهارة اليدوية الدقيقة.",
+      "coreSubjects": [
+        "تشريح الفم والأسنان",
+        "المواد السنية",
+        "علاج الجذور",
+        "الاستعاضة السنية",
+        "جراحة الفم",
+        "تقويم الأسنان"
+      ],
+      "skills": [
+        "الحشوات والعلاجات التحفظية",
+        "خلع وجراحة الأسنان",
+        "تركيب التركيبات الثابتة والمتحركة",
+        "التعامل مع أجهزة العيادة",
+        "العمل اليدوي الدقيق"
+      ],
+      "careers": [
+        "طبيب أسنان عام",
+        "اختصاصي تقويم",
+        "اختصاصي جراحة فم",
+        "اختصاصي تجميل الأسنان",
+        "صاحب عيادة خاصة"
+      ],
+      "interestTags": [
+        "biology",
+        "chemistry",
+        "helping_people",
+        "design"
+      ],
+      "studyYears": 5,
+      "degreeAwarded": "بكالوريوس طب أسنان",
+      "orderIndex": 2
+    },
+    {
+      "departmentId": "dep_pharmacy",
+      "collegeId": "col_medicine",
+      "description": "الصيدلة تدرس الأدوية من حيث تركيبها وتأثيرها وتصنيعها وصرفها، ودور الصيدلي في ضمان الاستخدام الآمن للدواء.",
+      "coreSubjects": [
+        "الكيمياء الصيدلية",
+        "الصيدلانيات",
+        "علم الأدوية",
+        "العقاقير",
+        "الصيدلة السريرية",
+        "الرقابة الدوائية"
+      ],
+      "skills": [
+        "صرف الدواء وتقديم المشورة",
+        "كشف التداخلات الدوائية",
+        "تحضير المستحضرات",
+        "ضبط الجودة",
+        "إدارة المخزون الدوائي"
+      ],
+      "careers": [
+        "صيدلي مجتمعي",
+        "صيدلي مستشفى",
+        "صيدلي سريري",
+        "مندوب علمي",
+        "مراقب جودة في مصنع أدوية"
+      ],
+      "interestTags": [
+        "chemistry",
+        "biology",
+        "helping_people"
+      ],
+      "studyYears": 5,
+      "degreeAwarded": "بكالوريوس صيدلة",
+      "orderIndex": 3
+    },
+    {
+      "departmentId": "dep_nursing",
+      "collegeId": "col_medicine",
+      "description": "التمريض يؤهل لتقديم الرعاية الصحية المباشرة للمرضى ومتابعة حالتهم وتنفيذ الخطط العلاجية بالتعاون مع الفريق الطبي.",
+      "coreSubjects": [
+        "أساسيات التمريض",
+        "تمريض الباطنة والجراحة",
+        "تمريض الأطفال",
+        "تمريض الحالات الحرجة",
+        "التغذية العلاجية",
+        "صحة المجتمع"
+      ],
+      "skills": [
+        "العناية بالمريض ومتابعة العلامات الحيوية",
+        "إعطاء الأدوية والحقن",
+        "التعامل مع الطوارئ",
+        "التثقيف الصحي",
+        "العمل ضمن فريق"
+      ],
+      "careers": [
+        "ممرض في المستشفيات",
+        "ممرض عناية مركزة",
+        "ممرض طوارئ",
+        "ممرض صحة مجتمع",
+        "مشرف تمريض"
+      ],
+      "interestTags": [
+        "biology",
+        "helping_people",
+        "teaching"
+      ],
+      "studyYears": 4,
+      "degreeAwarded": "بكالوريوس تمريض",
+      "orderIndex": 4
+    },
+    {
+      "departmentId": "dep_cs",
+      "collegeId": "col_computer",
+      "description": "علوم الحاسوب تدرس أسس الحوسبة من خوارزميات وهياكل بيانات ونظم تشغيل وذكاء اصطناعي، وتبني قدرة حل المشكلات برمجياً.",
+      "coreSubjects": [
+        "البرمجة",
+        "هياكل البيانات",
+        "الخوارزميات",
+        "نظم التشغيل",
+        "قواعد البيانات",
+        "الشبكات",
+        "الذكاء الاصطناعي"
+      ],
+      "skills": [
+        "البرمجة بعدة لغات",
+        "تصميم الخوارزميات وتحليل كفاءتها",
+        "بناء قواعد البيانات",
+        "حل المشكلات المنطقية",
+        "أساسيات تعلم الآلة"
+      ],
+      "careers": [
+        "مطور برمجيات",
+        "مهندس بيانات",
+        "مطور ذكاء اصطناعي",
+        "مدير قواعد بيانات",
+        "باحث في الحوسبة"
+      ],
+      "interestTags": [
+        "programming",
+        "math",
+        "research"
+      ],
+      "studyYears": 4,
+      "degreeAwarded": "بكالوريوس علوم حاسوب",
+      "orderIndex": 1
+    },
+    {
+      "departmentId": "dep_software_eng",
+      "collegeId": "col_computer",
+      "description": "هندسة البرمجيات تركّز على بناء أنظمة برمجية كبيرة بمنهجية واضحة: تحليل المتطلبات، التصميم، التطوير، الاختبار، والصيانة.",
+      "coreSubjects": [
+        "تحليل وتصميم النظم",
+        "هندسة المتطلبات",
+        "أنماط التصميم",
+        "اختبار البرمجيات",
+        "إدارة مشاريع البرمجيات",
+        "تطوير تطبيقات الويب والجوال"
+      ],
+      "skills": [
+        "تحليل متطلبات العملاء",
+        "تصميم معمارية النظام",
+        "العمل بمنهجيات Agile",
+        "استخدام Git والعمل الجماعي",
+        "كتابة كود قابل للصيانة والاختبار"
+      ],
+      "careers": [
+        "مهندس برمجيات",
+        "مطور تطبيقات جوال",
+        "مطور ويب",
+        "محلل نظم",
+        "مدير مشروع تقني"
+      ],
+      "interestTags": [
+        "programming",
+        "design",
+        "business"
+      ],
+      "studyYears": 4,
+      "degreeAwarded": "بكالوريوس هندسة برمجيات",
+      "orderIndex": 2
+    },
+    {
+      "departmentId": "dep_information_sys",
+      "collegeId": "col_computer",
+      "description": "نظم المعلومات تربط بين التقنية وإدارة الأعمال، وتؤهل لبناء وإدارة الأنظمة التي تدعم قرارات المؤسسات.",
+      "coreSubjects": [
+        "نظم المعلومات الإدارية",
+        "قواعد البيانات المتقدمة",
+        "تحليل الأعمال",
+        "نظم دعم القرار",
+        "أمن المعلومات",
+        "إدارة المشاريع"
+      ],
+      "skills": [
+        "تحليل العمليات في المؤسسات",
+        "تصميم وإدارة قواعد البيانات",
+        "إعداد التقارير ولوحات المتابعة",
+        "ربط الأنظمة بالاحتياج الإداري"
+      ],
+      "careers": [
+        "محلل نظم معلومات",
+        "مدير قواعد بيانات",
+        "محلل أعمال",
+        "مستشار أنظمة ERP",
+        "مسؤول تقنية معلومات"
+      ],
+      "interestTags": [
+        "programming",
+        "business",
+        "math"
+      ],
+      "studyYears": 4,
+      "degreeAwarded": "بكالوريوس نظم معلومات",
+      "orderIndex": 3
+    },
+    {
+      "departmentId": "dep_cyber_security",
+      "collegeId": "col_computer",
+      "description": "الأمن السيبراني يختص بحماية الأنظمة والشبكات والبيانات من الاختراق، عبر فهم أساليب الهجوم وبناء الدفاعات المناسبة.",
+      "coreSubjects": [
+        "أمن الشبكات",
+        "التشفير",
+        "الاختبار الأخلاقي للاختراق",
+        "التحقيق الجنائي الرقمي",
+        "أمن التطبيقات",
+        "إدارة المخاطر"
+      ],
+      "skills": [
+        "تأمين الشبكات والخوادم",
+        "اكتشاف الثغرات ومعالجتها",
+        "تحليل الحوادث الأمنية",
+        "تطبيق سياسات الأمن",
+        "استخدام أدوات الفحص الأمني"
+      ],
+      "careers": [
+        "محلل أمن سيبراني",
+        "مختبر اختراق",
+        "مسؤول أمن الشبكات",
+        "محقق جنائي رقمي",
+        "مستشار أمن معلومات"
+      ],
+      "interestTags": [
+        "programming",
+        "math",
+        "research",
+        "electronics"
+      ],
+      "studyYears": 4,
+      "degreeAwarded": "بكالوريوس أمن سيبراني",
+      "orderIndex": 4
+    },
+    {
+      "departmentId": "dep_accounting",
+      "collegeId": "col_business",
+      "description": "المحاسبة تدرس تسجيل العمليات المالية وتحليلها وإعداد القوائم المالية، وهي لغة الأعمال التي تُقاس بها نتائج أي منشأة.",
+      "coreSubjects": [
+        "مبادئ المحاسبة",
+        "المحاسبة المتوسطة",
+        "محاسبة التكاليف",
+        "المراجعة",
+        "المحاسبة الضريبية",
+        "التحليل المالي"
+      ],
+      "skills": [
+        "إعداد القوائم المالية",
+        "استخدام برامج المحاسبة",
+        "تحليل التكاليف",
+        "إعداد الموازنات",
+        "المراجعة الداخلية"
+      ],
+      "careers": [
+        "محاسب مالي",
+        "مدقق حسابات",
+        "محاسب تكاليف",
+        "محلل مالي",
+        "مدير مالي"
+      ],
+      "interestTags": [
+        "math",
+        "business",
+        "writing"
+      ],
+      "studyYears": 4,
+      "degreeAwarded": "بكالوريوس محاسبة",
+      "orderIndex": 1
+    },
+    {
+      "departmentId": "dep_business_admin",
+      "collegeId": "col_business",
+      "description": "إدارة الأعمال تؤهل لقيادة المؤسسات عبر التخطيط والتنظيم وإدارة الموارد البشرية والتسويق واتخاذ القرارات الاستراتيجية.",
+      "coreSubjects": [
+        "مبادئ الإدارة",
+        "إدارة الموارد البشرية",
+        "التسويق",
+        "السلوك التنظيمي",
+        "الإدارة الاستراتيجية",
+        "إدارة العمليات"
+      ],
+      "skills": [
+        "التخطيط ووضع الأهداف",
+        "قيادة فرق العمل",
+        "إعداد خطط التسويق",
+        "التفاوض والتواصل",
+        "اتخاذ القرار الإداري"
+      ],
+      "careers": [
+        "مدير إداري",
+        "أخصائي موارد بشرية",
+        "مسؤول تسويق",
+        "رائد أعمال",
+        "مستشار إداري"
+      ],
+      "interestTags": [
+        "business",
+        "teaching",
+        "writing",
+        "languages"
+      ],
+      "studyYears": 4,
+      "degreeAwarded": "بكالوريوس إدارة أعمال",
+      "orderIndex": 2
+    },
+    {
+      "departmentId": "dep_law",
+      "collegeId": "col_law",
+      "description": "القانون يدرس القواعد المنظّمة لعلاقات الأفراد والدولة، ويؤهل للترافع والاستشارات القانونية وصياغة العقود.",
+      "coreSubjects": [
+        "المدخل لدراسة القانون",
+        "القانون المدني",
+        "القانون الجنائي",
+        "القانون التجاري",
+        "القانون الدستوري",
+        "أصول المحاكمات"
+      ],
+      "skills": [
+        "البحث في النصوص القانونية",
+        "صياغة العقود واللوائح",
+        "المرافعة والإقناع",
+        "تحليل القضايا",
+        "الكتابة القانونية الدقيقة"
+      ],
+      "careers": [
+        "محامٍ",
+        "مستشار قانوني",
+        "قاضٍ أو عضو نيابة",
+        "موثّق عقود",
+        "باحث قانوني"
+      ],
+      "interestTags": [
+        "law_justice",
+        "writing",
+        "languages",
+        "research"
+      ],
+      "studyYears": 4,
+      "degreeAwarded": "بكالوريوس قانون",
+      "orderIndex": 1
+    }
+  ],
+  "admission_requirements": [
+    {
+      "collegeId": "col_engineering",
+      "academicYear": "2026/2027",
+      "acceptedCertificates": [
+        "yemeni_general",
+        "technical_diploma",
+        "foreign_equivalent"
+      ],
+      "allowedTracks": [
+        "scientific",
+        "technical"
+      ],
+      "minGpa": 75.0,
+      "minGpaByTrack": {
+        "scientific": 75.0,
+        "technical": 80.0
+      },
+      "minGpaByCertificate": {
+        "foreign_equivalent": 78.0
+      },
+      "maxCertificateAgeYears": 5,
+      "requiresEquivalency": true,
+      "subjectRequirements": [
+        {
+          "subjectCode": "math",
+          "subjectName": "الرياضيات",
+          "minGrade": 70.0
+        },
+        {
+          "subjectCode": "physics",
+          "subjectName": "الفيزياء",
+          "minGrade": 65.0
+        }
+      ],
+      "requiredDocuments": [
+        "أصل شهادة الثانوية العامة",
+        "صورة من البطاقة الشخصية أو جواز السفر",
+        "6 صور شخصية حديثة",
+        "استمارة التقديم معبأة",
+        "إيصال سداد رسوم التقديم",
+        "كشف درجات مفصّل للثانوية"
+      ],
+      "entranceExams": [
+        {
+          "code": "eng_aptitude",
+          "name": "اختبار القدرات الهندسية",
+          "description": "اختبار تحريري في الرياضيات والفيزياء ومهارات التفكير المنطقي",
+          "isRequired": true,
+          "subjects": [
+            "رياضيات",
+            "فيزياء",
+            "تفكير منطقي"
+          ]
+        }
+      ],
+      "departmentOverrides": [
+        {
+          "departmentId": "dep_architecture",
+          "minGpa": 78.0,
+          "extraExamCodes": [
+            "arch_drawing"
+          ],
+          "subjectRequirements": []
+        }
+      ],
+      "notes": "يُشترط اجتياز الكشف الطبي قبل تأكيد القبول."
+    },
+    {
+      "collegeId": "col_medicine",
+      "academicYear": "2026/2027",
+      "acceptedCertificates": [
+        "yemeni_general",
+        "foreign_equivalent"
+      ],
+      "allowedTracks": [
+        "scientific"
+      ],
+      "minGpa": 85.0,
+      "minGpaByTrack": {
+        "scientific": 85.0
+      },
+      "minGpaByCertificate": {
+        "foreign_equivalent": 88.0
+      },
+      "maxCertificateAgeYears": 3,
+      "requiresEquivalency": true,
+      "subjectRequirements": [
+        {
+          "subjectCode": "biology",
+          "subjectName": "الأحياء",
+          "minGrade": 85.0
+        },
+        {
+          "subjectCode": "chemistry",
+          "subjectName": "الكيمياء",
+          "minGrade": 80.0
+        }
+      ],
+      "requiredDocuments": [
+        "أصل شهادة الثانوية العامة",
+        "صورة من البطاقة الشخصية أو جواز السفر",
+        "6 صور شخصية حديثة",
+        "استمارة التقديم معبأة",
+        "إيصال سداد رسوم التقديم",
+        "شهادة فحص طبي معتمدة",
+        "كشف درجات مفصّل للثانوية"
+      ],
+      "entranceExams": [
+        {
+          "code": "med_aptitude",
+          "name": "اختبار القدرات الطبية",
+          "description": "اختبار في الأحياء والكيمياء والفهم القرائي",
+          "isRequired": true,
+          "subjects": [
+            "أحياء",
+            "كيمياء",
+            "فهم قرائي"
+          ]
+        },
+        {
+          "code": "med_interview",
+          "name": "المقابلة الشخصية",
+          "description": "تقييم مهارات التواصل والدافعية لدراسة الطب",
+          "isRequired": true,
+          "subjects": []
+        }
+      ],
+      "departmentOverrides": [
+        {
+          "departmentId": "dep_human_medicine",
+          "minGpa": 90.0,
+          "extraExamCodes": [],
+          "subjectRequirements": []
+        },
+        {
+          "departmentId": "dep_nursing",
+          "minGpa": 70.0,
+          "allowedTracks": [
+            "scientific",
+            "technical"
+          ],
+          "extraExamCodes": [],
+          "subjectRequirements": []
+        }
+      ],
+      "notes": "القبول تنافسي ويخضع للطاقة الاستيعابية المتاحة لكل قسم."
+    },
+    {
+      "collegeId": "col_computer",
+      "academicYear": "2026/2027",
+      "acceptedCertificates": [
+        "yemeni_general",
+        "technical_diploma",
+        "foreign_equivalent"
+      ],
+      "allowedTracks": [
+        "scientific",
+        "technical",
+        "commercial"
+      ],
+      "minGpa": 70.0,
+      "minGpaByTrack": {
+        "scientific": 70.0,
+        "technical": 72.0,
+        "commercial": 80.0
+      },
+      "minGpaByCertificate": {},
+      "maxCertificateAgeYears": null,
+      "requiresEquivalency": true,
+      "subjectRequirements": [
+        {
+          "subjectCode": "math",
+          "subjectName": "الرياضيات",
+          "minGrade": 65.0
+        }
+      ],
+      "requiredDocuments": [
+        "أصل شهادة الثانوية العامة",
+        "صورة من البطاقة الشخصية أو جواز السفر",
+        "6 صور شخصية حديثة",
+        "استمارة التقديم معبأة",
+        "إيصال سداد رسوم التقديم"
+      ],
+      "entranceExams": [
+        {
+          "code": "cs_placement",
+          "name": "اختبار تحديد المستوى",
+          "description": "اختبار في الرياضيات والتفكير المنطقي وأساسيات الحاسوب",
+          "isRequired": false,
+          "subjects": [
+            "رياضيات",
+            "تفكير منطقي"
+          ]
+        }
+      ],
+      "departmentOverrides": [
+        {
+          "departmentId": "dep_cyber_security",
+          "minGpa": 78.0,
+          "allowedTracks": [
+            "scientific",
+            "technical"
+          ],
+          "extraExamCodes": [],
+          "subjectRequirements": []
+        }
+      ],
+      "notes": "اختبار تحديد المستوى غير إلزامي ولا يؤثر على القبول."
+    },
+    {
+      "collegeId": "col_business",
+      "academicYear": "2026/2027",
+      "acceptedCertificates": [
+        "yemeni_general",
+        "technical_diploma",
+        "azhari",
+        "foreign_equivalent"
+      ],
+      "allowedTracks": [
+        "scientific",
+        "literary",
+        "commercial"
+      ],
+      "minGpa": 60.0,
+      "minGpaByTrack": {
+        "commercial": 58.0,
+        "literary": 62.0,
+        "scientific": 60.0
+      },
+      "minGpaByCertificate": {},
+      "maxCertificateAgeYears": null,
+      "requiresEquivalency": true,
+      "subjectRequirements": [],
+      "requiredDocuments": [
+        "أصل شهادة الثانوية العامة",
+        "صورة من البطاقة الشخصية أو جواز السفر",
+        "6 صور شخصية حديثة",
+        "استمارة التقديم معبأة",
+        "إيصال سداد رسوم التقديم"
+      ],
+      "entranceExams": [],
+      "departmentOverrides": [
+        {
+          "departmentId": "dep_accounting",
+          "minGpa": 65.0,
+          "extraExamCodes": [],
+          "subjectRequirements": [
+            {
+              "subjectCode": "math",
+              "subjectName": "الرياضيات",
+              "minGrade": 60.0
+            }
+          ]
+        }
+      ],
+      "notes": "يوجد نظام دراسة مسائي لهذه الكلية."
+    },
+    {
+      "collegeId": "col_law",
+      "academicYear": "2026/2027",
+      "acceptedCertificates": [
+        "yemeni_general",
+        "azhari",
+        "foreign_equivalent"
+      ],
+      "allowedTracks": [
+        "literary",
+        "scientific"
+      ],
+      "minGpa": 60.0,
+      "minGpaByTrack": {
+        "literary": 60.0,
+        "scientific": 65.0
+      },
+      "minGpaByCertificate": {
+        "azhari": 58.0
+      },
+      "maxCertificateAgeYears": null,
+      "requiresEquivalency": true,
+      "subjectRequirements": [],
+      "requiredDocuments": [
+        "أصل شهادة الثانوية العامة",
+        "صورة من البطاقة الشخصية أو جواز السفر",
+        "6 صور شخصية حديثة",
+        "استمارة التقديم معبأة",
+        "إيصال سداد رسوم التقديم",
+        "شهادة حسن سيرة وسلوك"
+      ],
+      "entranceExams": [],
+      "departmentOverrides": [],
+      "notes": "تُعطى أولوية لحملة الشهادة الأزهرية في قسم الشريعة."
+    }
+  ],
+  "app_config": {
+    "university": {
+      "name": "الجامعة",
+      "city": "صنعاء",
+      "location": {
+        "latitude": 15.3694,
+        "longitude": 44.191
+      }
+    },
+    "admission": {
+      "currentAcademicYear": "2026/2027",
+      "announcement": "التقديم للعام الجامعي 2026/2027 مفتوح حتى 30 سبتمبر",
+      "isMatcherEnabled": true
+    },
+    "certificates": {
+      "gradeBands": {
+        "1": 95.0,
+        "2": 85.0,
+        "3": 75.0,
+        "4": 65.0
+      }
+    }
+  }
+}

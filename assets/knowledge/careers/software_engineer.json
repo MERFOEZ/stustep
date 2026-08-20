@@ -1,0 +1,34 @@
+{
+  "id": "career_software_engineer",
+  "name": "Software Engineer",
+  "name_ar": "مهندس برمجيات",
+  "description": "Designs, develops, tests, and maintains software systems. Works across front-end, back-end, mobile, or full-stack domains. May specialize in embedded systems, cloud, or AI-assisted development.",
+  "environment": "corporate",
+  "related_major_ids": [
+    "major_computer_science",
+    "major_software_engineering"
+  ],
+  "required_skill_ids": [
+    "skill_programming_fundamentals",
+    "skill_problem_solving",
+    "skill_data_structures",
+    "skill_algorithms"
+  ],
+  "preferred_skill_ids": [
+    "skill_teamwork",
+    "skill_communication",
+    "skill_system_design",
+    "skill_version_control"
+  ],
+  "personality_weights": {
+    "openness": 0.7,
+    "conscientiousness": 0.8,
+    "extraversion": 0.4,
+    "agreeableness": 0.5,
+    "emotionalStability": 0.6
+  },
+  "market_demand": 0.95,
+  "salary_range_usd": [65000, 200000],
+  "years_to_senior": 5,
+  "tags": ["technology", "programming", "software", "engineering"]
+}

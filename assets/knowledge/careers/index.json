@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "description": "StuStep SAIE Knowledge Base — Careers Index",
+  "careers": [
+    "software_engineer.json",
+    "data_scientist.json",
+    "ai_researcher.json",
+    "doctor.json",
+    "lawyer.json",
+    "business_analyst.json",
+    "architect.json",
+    "psychologist.json",
+    "cybersecurity_analyst.json",
+    "electrical_engineer.json"
+  ]
+}
