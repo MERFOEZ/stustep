@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +8,7 @@ import '../housing/widgets/housing_form_fields.dart';
 import '../models/admission_enums.dart';
 import '../models/college_summary.dart';
 import '../models/exam_paper_model.dart';
+import '../models/upload_file.dart';
 import '../requirements/widgets/certificate_form_fields.dart';
 import '../widgets/admission_app_bar.dart';
 
@@ -32,9 +31,7 @@ class _UploadPaperScreenState extends State<UploadPaperScreen> {
   ExamPaperType _type = ExamPaperType.model;
   late int _year;
 
-  File? _file;
-  String? _fileName;
-  int _fileSize = 0;
+  UploadFile? _file;
   bool _isUploading = false;
 
   @override
@@ -55,31 +52,29 @@ class _UploadPaperScreenState extends State<UploadPaperScreen> {
   ///
   /// رفض الملف الكبير هنا برسالة واضحة أفضل بكثير من محاولة رفعه دقيقتين
   /// ثم فشله بخطأ شبكة مبهم يظنّه الطالب مشكلة في اتصاله.
+  ///
+  /// `withData: true` ضرورية لا تحسينية: على الويب يُعيد المنتقي `path`
+  /// فارغاً دائماً، فالاعتماد عليه كان يجعل زر الاختيار لا يفعل شيئاً بلا
+  /// أي رسالة خطأ — وهو أسوأ أنواع الأعطال.
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
+      withData: true,
     );
-    final path = result?.files.single.path;
-    if (path == null || !mounted) return;
 
-    final file = File(path);
-    final size = await file.length();
+    final picked = result?.files.single;
+    final bytes = picked?.bytes;
+    if (picked == null || bytes == null || !mounted) return;
 
-    if (!mounted) return;
-
-    if (size > ExamPaperService.maxFileSizeBytes) {
+    if (bytes.length > ExamPaperService.maxFileSizeBytes) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('admission.papers.file_too_large'.tr())),
       );
       return;
     }
 
-    setState(() {
-      _file = file;
-      _fileName = result!.files.single.name;
-      _fileSize = size;
-    });
+    setState(() => _file = UploadFile(name: picked.name, bytes: bytes));
   }
 
   Future<void> _submit() async {
@@ -102,7 +97,7 @@ class _UploadPaperScreenState extends State<UploadPaperScreen> {
       id: '',
       title: _title.text.trim(),
       fileUrl: '',
-      fileName: _fileName ?? '',
+      fileName: file.name,
       collegeId: widget.college.id,
       courseName: _courseName.text.trim().isEmpty
           ? null
@@ -200,7 +195,8 @@ class _UploadPaperScreenState extends State<UploadPaperScreen> {
   }
 
   Widget _buildFilePicker(BuildContext context) {
-    final hasFile = _file != null;
+    final file = _file;
+    final hasFile = file != null;
     final color = hasFile
         ? const Color(0xFF00A152)
         : Theme.of(context).primaryColor;
@@ -228,7 +224,7 @@ class _UploadPaperScreenState extends State<UploadPaperScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              hasFile ? _fileName! : 'admission.papers.pick_file'.tr(),
+              hasFile ? file.name : 'admission.papers.pick_file'.tr(),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -241,7 +237,7 @@ class _UploadPaperScreenState extends State<UploadPaperScreen> {
             const SizedBox(height: 5),
             Text(
               hasFile
-                  ? _formatSize(_fileSize)
+                  ? _formatSize(file.sizeBytes)
                   : 'admission.papers.pick_file_hint'.tr(),
               style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
             ),

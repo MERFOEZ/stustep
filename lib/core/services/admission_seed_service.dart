@@ -15,7 +15,7 @@ class SeedResult {
   const SeedResult({required this.success, this.written = const {}, this.error});
 
   int get totalDocuments =>
-      written.values.fold(0, (acc, val) => acc + val);
+      written.values.fold(0, (total, written) => total + written);
 }
 
 /// أداة تطوير لاستيراد البيانات الأولية من `assets/seed/admission_seed.json`

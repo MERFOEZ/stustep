@@ -42,10 +42,14 @@ export PATH="/opt/fl/flutter/bin:$PATH" && flutter pub get
 
 ```bash
 export PATH="/opt/fl/flutter/bin:$PATH"
-flutter analyze                       # المتوقَّع: صفر أخطاء (14 ملاحظة info قديمة)
-flutter test --reporter=failures-only # المتوقَّع: 100/100 ناجح
-cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح
+flutter analyze                       # المتوقَّع: صفر أخطاء · 13 ملاحظة كلها في ملفات زملاء
+flutter test --reporter=failures-only # المتوقَّع: 145/145 ناجح
+cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح (يحتاج Java)
+flutter build web --release           # المتوقَّع: يبنى بنجاح (نشر Vercel)
 ```
+
+> ملفات الموديول نفسها **لا تُنتج أي ملاحظة تحليل**. أي ملاحظة جديدة فيها
+> تراجُع يجب إصلاحه، لا أمر عادي.
 
 ---
 
@@ -54,7 +58,7 @@ cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح
 تطبيق طلابي **جماعي** بـ Flutter + Firebase، أربعة مساهمين آخرين.
 **عمل Ahmad Hisham** هو موديول القبول الجامعي في `lib/features/admission/`.
 
-### حالة الموديول: ✅ مكتمل — المراحل 0 إلى 8
+### حالة الموديول: ✅ مكتمل — المراحل 0 إلى 9
 
 | القسم | المسار | الحالة |
 |---|---|---|
@@ -63,9 +67,13 @@ cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح
 | السكنات الطلابية | `admission/housing/` | ✅ |
 | نماذج الاختبارات | `admission/exam_papers/` | ✅ |
 | مساعد التخصص + محاكي «ماذا لو؟» | `admission/matcher/` | ✅ |
+| بوابة الجامعة الرسمية (روابط خارجية) | `admission/portal/` | ✅ |
 
-**الأرقام:** 65 ملفاً · 9,615 سطراً · 100 اختبار وحدة · 33 اختبار قواعد أمان
-· 243 مفتاح ترجمة × لغتين · صفر مجموعات Firestore قائمة عُدِّلت.
+**الأرقام:** 69 ملفاً · 10,083 سطراً · 145 اختباراً (115 منطق + 30 ودجت) ·
+33 اختبار قواعد أمان · 257 مفتاح ترجمة × لغتين · صفر مجموعات Firestore
+قائمة عُدِّلت.
+
+**كل المراحل موثّقة:** `docs/admission_phase_{1..9}_explanation.md`.
 
 ---
 
@@ -78,9 +86,14 @@ cd test/rules && npm install && npm test   # المتوقَّع: 33/33 ناجح
 4. **سقف 300 سطر لكل ملف.** أكبر ملف حالياً 297.
 5. **صفر نص مكتوب في الكود.** كل شيء عبر `easy_localization` تحت جذر
    `"admission"` في `assets/translations/{ar,en}.json`.
+   يحرس هذا اختبار `expectNoRawTranslationKeys()` في اختبارات الودجت.
 6. **التعدادات تُخزَّن نصاً لا رقماً** (`'yemeni_general'` لا `0`).
 7. **مجموعات الظل:** معرّف الوثيقة = معرّف الأصل
    (`department_guides/{departmentId}`)، ولا تُعدَّل مجموعات الزملاء.
+
+8. **صفر `dart:io` في الموديول.** التطبيق يُنشر على الويب أيضاً، و`File`
+   هناك ترمي `UnsupportedError`. الملفات تُمرَّر كـ`UploadFile`
+   (اسم + بايتات) والمعاينة بـ`MemoryImage` لا `FileImage`.
 
 ### ⛔ ملفات ممنوع تعديلها (شغل زملاء أو حساسة)
 
@@ -110,9 +123,10 @@ lib/core/theme/ · lib/main.dart · lib/firebase_options.dart
 | الصورة الكاملة للمشروع والمناقشة | `docs/FINAL_PROJECT_DOCUMENTATION.md` |
 | المتبقي والمهام القادمة | `docs/NEXT_STEPS.md` |
 | تحليل المشروع الأصلي والمخاطر | `docs/admission_project_analysis.md` |
-| شرح كل مرحلة | `docs/admission_phase_{1,2,3,4}_explanation.md` |
+| شرح كل مرحلة | `docs/admission_phase_{1..9}_explanation.md` |
 | قواعد الأمان + كيف تُنشر | `firestore.rules` |
 | بيانات أولية (5 كليات · 15 تخصصاً) | `assets/seed/admission_seed.json` |
+| مُهيّئ اختبارات الودجت بالترجمات الحقيقية | `test/admission/support/localized_pump.dart` |
 
 ---
 

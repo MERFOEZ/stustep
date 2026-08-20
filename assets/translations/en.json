@@ -234,6 +234,10 @@
       "matcher": {
         "title": "Major Matcher",
         "desc": "Suggestions that fit your GPA and interests"
+      },
+      "portal": {
+        "title": "Official University Portal",
+        "desc": "Apply, check results and pay fees on the university site"
       }
     },
     "certificate_type": {
@@ -430,6 +434,30 @@
       "delete_title": "Delete paper",
       "delete_confirm": "\"{title}\" will be permanently deleted. Are you sure?",
       "deleted": "Paper deleted"
+    },
+    "portal": {
+      "title": "Official University Portal",
+      "external_notice": "These are official university links and they open outside the app. Applying and paying fees happen on the university site itself — none of your data passes through this app.",
+      "empty": "No official university links have been added yet",
+      "open_failed": "Could not open the link",
+      "links": {
+        "website": {
+          "title": "Official Website",
+          "desc": "University home page and announcements"
+        },
+        "admission_portal": {
+          "title": "Online Application Portal",
+          "desc": "Submit your application and upload documents"
+        },
+        "results": {
+          "title": "Admission Results",
+          "desc": "Check the outcome of your application"
+        },
+        "fees_payment": {
+          "title": "Fees & Online Payment",
+          "desc": "Fee schedule and settling your dues"
+        }
+      }
     }
   }
 }

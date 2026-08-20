@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 /// إعدادات الجامعة — وثيقة `app_config/university`.
 class UniversityConfig {
@@ -6,7 +7,22 @@ class UniversityConfig {
   final String city;
   final GeoPoint? location;
 
-  const UniversityConfig({this.name = '', this.city = '', this.location});
+  /// عناوين البوابات الرسمية، مفتاحها `UniversityLinkKind.code`.
+  ///
+  /// **لماذا في الإعدادات لا في الكود؟** الجامعة تغيّر عناوين بواباتها بين
+  /// عام وآخر، وثبّتها في الكود يعني إصدار نسخة جديدة من التطبيق لتصحيح
+  /// رابط. تعديل حقل واحد في وثيقة واحدة يصل لكل الطلاب فوراً.
+  ///
+  /// تُخزَّن كنصوص خام هنا ولا تُفحص إلا عند بنائها في
+  /// `UniversityPortalLink.fromMap` — فحص العنوان قرار عرض لا قرار تخزين.
+  final Map<String, String> links;
+
+  const UniversityConfig({
+    this.name = '',
+    this.city = '',
+    this.location,
+    this.links = const {},
+  });
 
   factory UniversityConfig.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
@@ -16,7 +32,27 @@ class UniversityConfig {
       location: data['location'] is GeoPoint
           ? data['location'] as GeoPoint
           : null,
+      links: _readLinks(data['links']),
     );
+  }
+
+  /// قراءة متساهلة مع البيانات القادمة: أي قيمة ليست نصاً تُتجاهَل بدل أن
+  /// تُسقط قراءة الإعدادات كلها بـ`CastError`.
+  ///
+  /// مكشوفة للاختبار لأن مصدرها وثيقة يحرّرها بشر من Console، وأشكال الخطأ
+  /// فيها (رقم مكان نص، قيمة فارغة، حقل ليس خريطة) تستحق حراسة آلية.
+  @visibleForTesting
+  static Map<String, String> readLinks(Object? raw) => _readLinks(raw);
+
+  static Map<String, String> _readLinks(Object? raw) {
+    if (raw is! Map) return const {};
+    final result = <String, String>{};
+    raw.forEach((key, value) {
+      if (value is String && value.trim().isNotEmpty) {
+        result[key.toString()] = value.trim();
+      }
+    });
+    return result;
   }
 
   Map<String, dynamic> toFirestore() {
@@ -24,6 +60,7 @@ class UniversityConfig {
       'name': name,
       'city': city,
       if (location != null) 'location': location,
+      if (links.isNotEmpty) 'links': links,
     };
   }
 }

@@ -3,7 +3,8 @@
     "version": 1,
     "generatedFor": "StuStep — Admission Module (Phase 2)",
     "note": "معرّفات هذه البذرة ثابتة ومقروءة. راجع docs/admission_phase_2_explanation.md قبل الاستيراد.",
-    "interestTagsSource": "InterestCatalog.allIds — 14 معرّفاً"
+    "interestTagsSource": "InterestCatalog.allIds — 14 معرّفاً",
+    "linksWarning": "عناوين app_config/university.links عناوين مثال لا تعمل. استبدلها بعناوين جامعتك الحقيقية من Firebase Console — لا تحتاج إصدار نسخة جديدة من التطبيق. الرابط الفارغ أو المحذوف تختفي بطاقته تلقائياً."
   },
   "colleges": [
     {
@@ -945,6 +946,12 @@
       "location": {
         "latitude": 15.3694,
         "longitude": 44.191
+      },
+      "links": {
+        "website": "https://www.example-university.edu.ye",
+        "admission_portal": "https://admission.example-university.edu.ye",
+        "results": "https://admission.example-university.edu.ye/results",
+        "fees_payment": "https://admission.example-university.edu.ye/fees"
       }
     },
     "admission": {
